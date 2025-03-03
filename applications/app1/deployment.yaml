@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app1
-  namespace: argo-demo
+  namespace: argocd-aoa-test
 spec:
   replicas: 1
   selector:

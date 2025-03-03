@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: app1
-  namespace: argo-demo
+  namespace: argocd-aoa-test
 spec:
   selector:
     app: app1

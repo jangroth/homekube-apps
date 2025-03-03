@@ -11,7 +11,7 @@ spec:
     targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc # Or your Kubernetes API server
-    namespace: argo-demo
+    namespace: argo-aoa-test
   syncPolicy:
     automated:
       prune: true
