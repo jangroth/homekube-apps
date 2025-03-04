@@ -4,7 +4,7 @@ metadata:
   name: app1
   namespace: argocd-aoa-test
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: app1
