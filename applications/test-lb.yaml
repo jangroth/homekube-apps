@@ -1,19 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app2
+  name: test-lb
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
     repoURL: https://github.com/jangroth/homekube-apps.git
-    path: applications/app2
+    path: applications/wave-01-apps/test-lb
     targetRevision: HEAD
   destination:
-    server: https://kubernetes.default.svc # Or your Kubernetes API server
-    namespace: argo-aoa-test
+    server: https://kubernetes.default.svc
+    namespace: test-lb
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-  deletionPolicy: foreground
+    syncOptions:
+      - CreateNamespace=true
