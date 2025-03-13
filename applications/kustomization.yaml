@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - wave-00-init/metallb.yaml
   - wave-00-init/metrics-server.yaml
+  - wave-01-apps/kubernetes-dashboard.yaml
   - wave-01-apps/test-lb.yaml

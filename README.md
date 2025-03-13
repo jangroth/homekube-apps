@@ -14,4 +14,5 @@ ArgoCD apps for [homekube](https://github.com/jangroth/homekube).
 
 `argocd.argoproj.io/sync-wave: "1"`
 
+- [kubernetes-dashboard](applications/wave-01-apps/kubernetes-dashboard.yaml)
 - [test-lb](applications/wave-01-apps/test-lb.yaml)
