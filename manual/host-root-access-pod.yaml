@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: host-root-access-pod
+  namespace: default # Or your desired namespace
+spec:
+  # nodeSelector to target the specific node named 'pi2'
+  nodeSelector:
+    kubernetes.io/hostname: pi0
+  tolerations:
+    - key: "node-role.kubernetes.io/control-plane"
+      effect: "NoSchedule"
+
+  hostNetwork: true # Optional: Allows pod to use host's network namespace
+  hostPID: true # Optional: Allows pod to share host's PID namespace
+  hostIPC: true # Optional: Allows pod to share host's IPC namespace
+  containers:
+    - name: root-access-container
+      image: jangroth/debug-utils:1.0 # Or any other image with necessary tools (e.g., busybox, debian)
+      command: ["/bin/sh", "-c", "sleep infinity"] # Keep the container running for interactive access
+      securityContext:
+        privileged: true # THIS IS THE KEY SETTING FOR ROOT ACCESS
+      volumeMounts:
+        - mountPath: /host # Mount the host's root filesystem here
+          name: host-root-volume
+          readOnly: false # Allow read/write access
+  volumes:
+    - name: host-root-volume
+      hostPath:
+        path: / # Mount the host's root directory
+        type: Directory # Ensure it's treated as a directory
