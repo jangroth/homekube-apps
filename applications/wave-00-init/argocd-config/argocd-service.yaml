@@ -8,9 +8,6 @@ metadata:
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
-  annotations:
-    opentofu.org/managed-by: "opentofu"
-    opentofu.org/version: "1.9.0"
 spec:
   type: NodePort
   ports:
