@@ -23,5 +23,5 @@ spec:
       - RespectIgnoreDifferences=true
   sources:
     - repoURL: https://github.com/jangroth/homekube-apps.git
-      path: applications/wave-00-init/argocd-config
+      path: applications/wave-00-init/argocd-extras
       targetRevision: HEAD

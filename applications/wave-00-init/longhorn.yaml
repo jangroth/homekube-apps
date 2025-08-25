@@ -6,13 +6,16 @@ metadata:
   labels:
     wave: "00"
 spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-  project: default
   source:
     chart: longhorn
     repoURL: https://charts.longhorn.io/
@@ -27,6 +30,3 @@ spec:
           defaultReplicaCount: 2
         persistence:
           defaultClassReplicaCount: 2
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: longhorn-system

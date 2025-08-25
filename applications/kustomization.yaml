@@ -5,5 +5,5 @@ resources:
   - wave-00-init/longhorn.yaml
   - wave-00-init/metrics-server.yaml
   - wave-00-init/argocd-config.yaml
-  # - wave-01-apps/kubernetes-dashboard.yaml
+  - wave-01-apps/longhorn-extras/longhorn-service.yaml
   # - wave-01-apps/test-lb.yaml
