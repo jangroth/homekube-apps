@@ -5,6 +5,8 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    wave: "00"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
