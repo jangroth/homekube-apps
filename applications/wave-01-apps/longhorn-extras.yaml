@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-config
+  name: longhorn-extras
   namespace: argocd
   labels:
-    wave: "00"
+    wave: "01"
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "01"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -20,5 +20,5 @@ spec:
       selfHeal: true
   sources:
     - repoURL: https://github.com/jangroth/homekube-apps.git
-      path: applications/wave-00-init/argocd-extras
+      path: applications/wave-01-apps/longhorn-extras
       targetRevision: HEAD
