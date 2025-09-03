@@ -6,4 +6,5 @@ resources:
   - wave-00-init/metrics-server.yaml
   - wave-00-init/argocd-config.yaml
   - wave-01-apps/longhorn-extras.yaml
+  - wave-01-apps/kube-prometheus.yaml
   - wave-02-custom/longhorn-test.yaml
