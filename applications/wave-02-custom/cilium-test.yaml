@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: longhorn-test
+  name: cilium-test
   namespace: argocd
   labels:
     wave: "02"
@@ -13,7 +13,7 @@ spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
-    namespace: longhorn-test
+    namespace: cilium-test
   syncPolicy:
     automated:
       prune: true
@@ -22,5 +22,5 @@ spec:
       - CreateNamespace=true
   sources:
     - repoURL: https://github.com/jangroth/homekube-apps.git
-      path: applications/wave-02-custom/longhorn-test
+      path: applications/wave-02-custom/cilium-test
       targetRevision: HEAD
