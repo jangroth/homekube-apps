@@ -24,11 +24,21 @@ spec:
   source:
     chart: kube-prometheus-stack
     repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: 77.5.0
-    helm:
+    targetRevision: 77.6.0
+    helm: # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
       values: |
         prometheus:
           prometheusSpec:
             serviceMonitorSelectorNilUsesHelmValues: false
           service:
             type: NodePort
+            nodePort: 30002
+        grafana:
+          service:    
+            type: NodePort
+            nodePort: 30003
+        alertmanager:
+          enabled: true
+          service:
+            type: NodePort
+            nodePort: 30004
