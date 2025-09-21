@@ -13,7 +13,7 @@ all: build
 
 # Build the Go binary.
 build:
-	go build -o $(BINARY_NAME) ./main.go
+	go build -v -o $(BINARY_NAME) ./main.go
 
 # Build the Docker image.
 docker-build:
