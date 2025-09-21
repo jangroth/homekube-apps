@@ -29,6 +29,13 @@ spec:
       values: |
         prometheus:
           prometheusSpec:
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: longhorn
+                  resources:
+                    requests:
+                      storage: 50Gi
             serviceMonitorSelectorNilUsesHelmValues: false
           service:
             type: NodePort
