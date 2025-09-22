@@ -44,6 +44,9 @@ spec:
           service:    
             type: NodePort
             nodePort: 30003
+          grafana.ini:
+            date_formats:
+              default_timezone: Australia/Sydney
         alertmanager:
           enabled: true
           service:
