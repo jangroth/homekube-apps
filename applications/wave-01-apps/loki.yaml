@@ -30,40 +30,43 @@ spec:
     helm:
       values: |
         loki:
-          # Enable and configure persistent storage
+          # Define persistence at the top level
           persistence:
             enabled: true
             storageClassName: longhorn
             size: 20Gi
 
-        # Configure Loki to run in a simple, monolithic mode for a single cluster
+        # Configure Loki's internal components and storage
         config:
           auth_enabled: false
+
           server:
             http_listen_port: 3100
-            grpc_listen_port: 9095
-          
-          # This is the section that was missing
-          storage:
-            type: filesystem
-            filesystem:
-              directory: /data/loki
-          
-          schema_config:
-            configs:
-              - from: 2020-10-24
-                store: boltdb-shipper
+
+          common:
+            ring:
+              instance_addr: 127.0.0.1
+              kvstore:
+                store: inmemory
+            replication_factor: 1
+            path_prefix: /tmp/loki
+
+            schema_config:
+              configs:
+              - from: 2020-05-15
+                store: tsdb
                 object_store: filesystem
+                schema: v13
                 index:
-                  prefix: loki_index_
+                  prefix: index_
                   period: 24h
-                schema: v11
+
+            storage:
+              type: filesystem
+
+          storage_config:
+            filesystem:
+              directory: /tmp/loki/chunks
 
         singleBinary:
-          extraVolumeMounts:
-            - name: data
-              mountPath: /data
-          extraVolumes:
-            - name: data
-              persistentVolumeClaim:
-                claimName: loki-loki-persistent-volume-claim
+          replicas: 1
