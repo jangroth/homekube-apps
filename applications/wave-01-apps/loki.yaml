@@ -28,83 +28,56 @@ spec:
     repoURL: https://grafana.github.io/helm-charts
     targetRevision: 6.41.1
     helm:
-      # https://grafana.com/docs/loki/latest/setup/install/helm/reference/
       values: |
-        # CRITICAL FIX 1: Explicitly set the deployment mode
-        deploymentMode: SingleBinary
-
-        # CRITICAL FIX 2: Explicitly set replicas to 0 for the three primary distributed components
-        querier:
-          replicas: 0
-        ingester:
-          replicas: 0
-        distributor:
-          replicas: 0
-
-        # Only enable the single binary mode
-        singleBinary:
-          replicas: 1
-          
         loki:
-          # 1. Dummy bucket names (required to pass storage template check)
-          storage:
-            bucketNames:
-              chunks: "dummy-bucket-name"
-              ruler: "dummy-ruler-name"
-              admin: "dummy-admin-name"
-              
-          # 2. Persistence for the local PVC
+          enabled: true
+          
           persistence:
+            enabled: false
+          
+          compactor:
             enabled: true
-            storageClassName: longhorn
-            size: 20Gi
+            retention_enabled: true
+            working_directory: /var/loki/compactor
 
-          # 3. Configuration (using the pipe fix)
-          config: |
-            auth_enabled: false
+          # 1. CRITICAL: Define storage keys for Helm template helpers
+          storage:
+            type: s3
+            bucketNames:
+              chunks: loki-logs 
+              ruler: loki-ruler
+              admin: loki-admin
+            
+          # 2. CRITICAL: Define the core Loki config block as a map under the 'config' key
+          config:
+            limits_config:
+              retention_period: 2160h # 90d
 
-            server:
-              http_listen_port: 3100
-            
-            storage_config:
-              boltdb_shipper:
-                active_index_directory: /loki/index
-                cache_location: /loki/cache
-                shared_store: filesystem
-              filesystem:
-                directory: /loki/data
-            
-            schema_config:
+            schema_config: # This section satisfies the validation and config map
               configs:
-                - from: 2020-10-24
-                  store: boltdb-shipper
-                  object_store: filesystem
-                  index:
-                    prefix: index_
-                    period: 24h
-                  schema: v11
+              - from: 2020-10-24
+                store: tsdb 
+                object_store: s3
+                schema: v12
+                index:
+                  prefix: index_
+                  period: 24h
 
-      # loki:
-      #   # deploymentMode: SingleBinary
-
-      #   storage:
-      #     type: filesystem
-      #     filesystem:
-      #       chunks_directory: /var/lib/loki/chunks # Or your desired path for chunk data
-      #       rules_directory: /var/lib/loki/rules # Or your desired path for ruler rules
-
-      #   schemaConfig:
-      #     configs:
-      #       - from: "2025-01-01"
-      #         index:
-      #           period: 24h
-      #           prefix: index_
-      #         object_store: filesystem
-      #         schema: v13
-      #         store: tsdb
-
-      #   commonConfig:
-      #     replication_factor: 1 # For single-node local storage
-
-      #   ingester:
-      #     chunk_encoding: snappy
+            storage_config:
+              tsdb:
+                dir: /var/loki/tsdb
+              
+            # The 'aws' block MUST be defined as part of the config file
+            aws: 
+              endpoint: minio.minio.svc.cluster.local:9000
+              region: us-east-1
+              bucketnames: loki-logs
+              insecure: true
+              access_key_id: admin
+              secret_access_key: admin1234
+            
+        # Disable Promtail and Gateway as planned
+        promtail:
+          enabled: false
+        gateway:
+          enabled: false
