@@ -1,0 +1,26 @@
+global:
+  security:
+    allowInsecureImages: true
+
+auth:
+  rootUser: admin
+  rootPassword: admin1234
+
+persistence:
+  enabled: true
+  storageClass: longhorn
+  size: 50Gi
+
+# Use latest tags temporarily to get working deployment
+image:
+  repository: bitnami/minio
+  tag: latest
+
+console:
+  image:
+    repository: bitnami/minio-object-browser
+    tag: latest
+  service:
+    type: NodePort
+    nodePorts:
+      http: 30005

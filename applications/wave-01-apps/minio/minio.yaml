@@ -1,9 +1,7 @@
-# yaml-language-server: $schema=https://json.schemastore.org/yamllint.json
-
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: promtail
+  name: minio
   namespace: argocd
   labels:
     wave: "01"
@@ -15,7 +13,7 @@ spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
-    namespace: observability
+    namespace: minio
   syncPolicy:
     automated:
       prune: true
@@ -23,13 +21,13 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-  source:
-    chart: promtail
-    repoURL: https://grafana.github.io/helm-charts
-    targetRevision: 6.17.0
-    helm:
-      values: |
-        config:
-          clients:
-            - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
-        deploymentMode: DaemonSet
+  sources:
+    - chart: minio
+      repoURL: https://charts.bitnami.com/bitnami
+      targetRevision: 17.0.21
+      helm:
+        valueFiles:
+          - $values/applications/wave-01-apps/minio/minio-values.yaml
+    - repoURL: https://github.com/jangroth/homekube-apps.git
+      targetRevision: HEAD
+      ref: values
