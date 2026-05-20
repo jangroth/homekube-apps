@@ -2,12 +2,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   # - wave-00-init/metallb.yaml
-  - wave-00-init/longhorn.yaml
+  # - wave-00-init/longhorn.yaml
   - wave-00-init/metrics-server.yaml
-  - wave-00-init/argocd-config.yaml
-  - wave-01-apps/longhorn-extras.yaml
+  # - wave-00-init/argocd-config.yaml
+  # - wave-01-apps/longhorn-extras.yaml
   # - wave-01-apps/kube-prometheus.yaml
   # - wave-01-apps/minio/minio.yaml
   # - wave-01-apps/loki.yaml
-  - wave-02-custom/longhorn-test.yaml
-  - wave-02-custom/cilium-test.yaml
+  # - wave-02-custom/longhorn-test.yaml
+  # - wave-02-custom/cilium-test.yaml
