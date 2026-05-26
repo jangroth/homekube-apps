@@ -1,18 +1,38 @@
 # homekube-apps
 
-ArgoCD apps for [homekube](https://github.com/jangroth/homekube).
+ArgoCD applications for the [homekube](https://github.com/jangroth/homekube) cluster, managed via the [App-of-Apps pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/).
 
-## Init Wave
+ArgoCD watches this repo. A single root application (`applications/kustomization.yaml`) deploys everything below. Wave annotations control deployment order.
 
-`argocd.argoproj.io/sync-wave: "-1"`
+See [spec 005](../docs/specs/005-production-cluster-setup.md) for full capability descriptions, version policy, and acceptance criteria.
 
-- [metallb](applications/wave-00-init/metallb.yaml)
-- [metrics-server](applications/wave-00-init/metrics-server.yaml)
-    - Note [TLS requirements for metrics-server](https://github.com/kubernetes-sigs/metrics-server#requirements). This cluster has [serverTLSBootstrap](https://github.com/jangroth/homekube/blob/2b68020e8e7af61f524a29f254e15908a9a24493/ansible/roles/kubeadm/files/kubeadm-config.yaml#L59) enabled for Kubelets.
+---
 
-## Apps Wave
+## Deployed Components
 
-`argocd.argoproj.io/sync-wave: "1"`
+> ArgoCD itself is installed via Ansible (`homekube-main`), not managed here.
 
-- [kubernetes-dashboard](applications/wave-01-apps/kubernetes-dashboard.yaml)
-- [test-lb](applications/wave-01-apps/test-lb.yaml)
+| Component | Namespace | Wave | Chart Version | Access |
+|-----------|-----------|------|---------------|--------|
+| ArgoCD config | `argocd` | -1 | — | NodePort `:30000` |
+| metrics-server | `kube-system` | -1 | — | `kubectl top` |
+| sealed-secrets | `kube-system` | -1 | 2.18.6 | `kubeseal` CLI |
+
+---
+
+## Wave Structure
+
+| Wave | Purpose |
+|------|---------|
+| `-1` (`wave-00-init`) | Foundation: secrets, TLS, node hygiene, load balancer, storage |
+| `01` (`wave-01-apps`) | Observability: metrics, logs, dashboards |
+| `02` | Identity & SSO |
+| `03` | Service mesh, backups |
+
+---
+
+## Adding an App
+
+1. Create `applications/wave-NN-<name>/<app>.yaml` — ArgoCD `Application` manifest
+2. Add the path to `applications/kustomization.yaml`
+3. Commit and push — ArgoCD picks it up automatically
