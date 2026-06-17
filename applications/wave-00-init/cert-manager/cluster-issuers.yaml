@@ -1,0 +1,36 @@
+---
+# Bootstrap issuer — used only to sign the root CA certificate.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-bootstrap
+spec:
+  selfSigned: {}
+---
+# Root CA certificate (stored in cert-manager namespace so the ClusterIssuer can read it).
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: homekube-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: homekube-ca
+  secretName: homekube-ca-secret
+  duration: 87600h  # 10 years
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-bootstrap
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+# Cluster-wide CA issuer — all other Certificate resources reference this.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: homekube-ca
+spec:
+  ca:
+    secretName: homekube-ca-secret
