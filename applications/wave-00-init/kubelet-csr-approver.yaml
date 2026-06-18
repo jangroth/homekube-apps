@@ -25,6 +25,7 @@ spec:
       helm:
         values: |
           providerIpPrefixes: "10.0.0.0/24,10.244.0.0/16"
+          bypassDnsResolution: true
           resources:
             requests:
               memory: 32Mi
