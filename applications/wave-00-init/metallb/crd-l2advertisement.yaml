@@ -3,3 +3,8 @@ kind: L2Advertisement
 metadata:
   name: metallb-l2advertisement
   namespace: metallb-system
+spec:
+  nodeSelectors:
+    - matchExpressions:
+        - key: node-role.kubernetes.io/control-plane
+          operator: DoesNotExist
