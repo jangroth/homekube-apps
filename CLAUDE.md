@@ -16,7 +16,7 @@ ArgoCD runs on the cluster and watches this repo. A single root application (`ap
 
 | Wave | Sync Order | Apps |
 |------|-----------|------|
-| `wave-00-init` | First | MetalLB, Longhorn, metrics-server, ArgoCD config |
+| `wave-00-init` | First | Cilium LB (pool + L2 policy), metrics-server, ArgoCD config, sealed-secrets, cert-manager, kubelet-csr-approver |
 | `wave-01-apps` | After init | Kubernetes Dashboard, kube-prometheus, Loki, MinIO, Longhorn extras |
 | `wave-02-custom` | Last | Cilium test, Longhorn test |
 
