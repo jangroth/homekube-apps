@@ -8,13 +8,14 @@ metadata:
     app.kubernetes.io/instance: longhorn
     app.kubernetes.io/component: ui
     app.kubernetes.io/managed-by: argocd
+  annotations:
+    io.cilium/lb-ipam-ips: "192.168.86.242"
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
-    - port: 8000
+    - port: 80
       protocol: TCP
       targetPort: 8000
-      nodePort: 30001
   selector:
     app: longhorn-ui
 status:

@@ -21,8 +21,7 @@ spec:
   source:
     chart: longhorn
     repoURL: https://charts.longhorn.io/
-    targetRevision: v1.9.1
-    path: applications/wave-00-init/longhorn
+    targetRevision: v1.11.2
     helm:
       values: |
         preUpgradeChecker:
