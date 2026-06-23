@@ -24,11 +24,24 @@ spec:
   source:
     chart: kube-prometheus-stack
     repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: 79.50.0
+    targetRevision: 87.0.1
     helm: # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
       values: |
+        # Grafana is disabled here; enabled and configured in capability 8 (kube-prometheus-grafana.yaml)
+        grafana:
+          enabled: false
+
         prometheus:
+          podDisruptionBudget:
+            enabled: true
+            maxUnavailable: 0
+          service:
+            type: NodePort
+            nodePort: 30002
           prometheusSpec:
+            retention: 15d
+            retentionSize: 40GiB
+            serviceMonitorSelectorNilUsesHelmValues: false
             storageSpec:
               volumeClaimTemplate:
                 spec:
@@ -36,19 +49,59 @@ spec:
                   resources:
                     requests:
                       storage: 50Gi
-            serviceMonitorSelectorNilUsesHelmValues: false
-          service:
-            type: NodePort
-            nodePort: 30002
-        grafana:
-          service:    
-            type: NodePort
-            nodePort: 30003
-          grafana.ini:
-            date_formats:
-              default_timezone: Australia/Sydney
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: node-role.kubernetes.io/control-plane
+                          operator: DoesNotExist
+            resources:
+              requests:
+                memory: 2Gi
+                cpu: 200m
+              limits:
+                memory: 4Gi
+                cpu: 1000m
+
         alertmanager:
           enabled: true
+          podDisruptionBudget:
+            enabled: true
+            maxUnavailable: 0
           service:
             type: NodePort
             nodePort: 30004
+          alertmanagerSpec:
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: node-role.kubernetes.io/control-plane
+                          operator: DoesNotExist
+            resources:
+              requests:
+                memory: 128Mi
+                cpu: 10m
+              limits:
+                memory: 256Mi
+                cpu: 100m
+
+        prometheus-node-exporter:
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 10m
+            limits:
+              memory: 128Mi
+              cpu: 100m
+
+        kube-state-metrics:
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 10m
+            limits:
+              memory: 256Mi
+              cpu: 100m
