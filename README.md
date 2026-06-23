@@ -15,7 +15,7 @@ See [spec 005](../docs/specs/005-production-cluster-setup.md) for full capabilit
 | Component | Namespace | Wave | Chart Version | Access |
 |-----------|-----------|------|---------------|--------|
 | Cilium LB-IPAM + L2 | `kube-system` | -1 | — (CRs only) | VIP pool `192.168.86.241–251` |
-| ArgoCD config | `argocd` | -1 | — | NodePort `:30000` |
+| ArgoCD config | `argocd` | -1 | — | `192.168.86.241:80` |
 | metrics-server | `kube-system` | -1 | — | `kubectl top` |
 | sealed-secrets | `kube-system` | -1 | 2.18.6 | `kubeseal` CLI |
 | cert-manager | `cert-manager` | -1 | 1.20.2 | `ClusterIssuer/homekube-ca` |

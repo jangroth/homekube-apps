@@ -45,5 +45,5 @@ Wave is set via annotation: `argocd.argoproj.io/sync-wave: "N"`
 
 ## ArgoCD Access
 
-After cluster setup: ArgoCD is exposed as NodePort on port 30000.
-`kubectl -n argocd get svc` to confirm.
+After cluster setup: ArgoCD is exposed as LoadBalancer (VIP from Cilium LB-IPAM pool).
+`kubectl -n argocd get svc cst-argocd-server` to see the assigned IP.

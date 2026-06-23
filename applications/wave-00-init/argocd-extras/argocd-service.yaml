@@ -8,13 +8,14 @@ metadata:
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/component: server
     app.kubernetes.io/managed-by: argocd
+  annotations:
+    io.cilium/lb-ipam-ips: "192.168.86.241"
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
-    - port: 8080
+    - port: 80
       protocol: TCP
       targetPort: 8080
-      nodePort: 30000
   selector:
     app.kubernetes.io/instance: argocd
     app.kubernetes.io/name: argocd-server
