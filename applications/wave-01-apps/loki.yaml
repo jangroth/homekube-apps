@@ -55,6 +55,10 @@ spec:
           # Single-tenant home lab — no org ID header needed on push or query.
           auth_enabled: false
 
+          # SingleBinary with 1 replica: ring replication factor must match.
+          commonConfig:
+            replication_factor: 1
+
           analytics:
             reporting_enabled: false
 
