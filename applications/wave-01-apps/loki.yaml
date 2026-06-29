@@ -52,6 +52,9 @@ spec:
             delete_request_store: filesystem
             retention_enabled: true
 
+          # Single-tenant home lab — no org ID header needed on push or query.
+          auth_enabled: false
+
           analytics:
             reporting_enabled: false
 
