@@ -1,0 +1,112 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy
+  namespace: argocd
+  labels:
+    wave: "01"
+  annotations:
+    argocd.argoproj.io/sync-wave: "01"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+  source:
+    chart: alloy
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 1.8.1
+    helm:
+      values: |
+        controller:
+          type: daemonset
+
+        alloy:
+          mounts:
+            # /var/log covers /var/log/pods — where containerd writes container logs.
+            varlog: true
+            dockercontainers: false
+
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 50m
+            limits:
+              memory: 256Mi
+              cpu: 200m
+
+          configMap:
+            create: true
+            content: |
+              // Discover all Kubernetes pods on this node.
+              discovery.kubernetes "pods" {
+                role = "pod"
+              }
+
+              // Relabel pod metadata to Loki labels and build log file paths.
+              discovery.relabel "pod_logs" {
+                targets = discovery.kubernetes.pods.targets
+
+                // Only collect logs from pods scheduled on this node.
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_node_name"]
+                  target_label  = "__host__"
+                }
+
+                rule {
+                  source_labels = ["__meta_kubernetes_namespace"]
+                  target_label  = "namespace"
+                }
+
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_name"]
+                  target_label  = "pod"
+                }
+
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_container_name"]
+                  target_label  = "container"
+                }
+
+                rule {
+                  source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_name"]
+                  separator     = "/"
+                  target_label  = "job"
+                }
+
+                // Build the log file path from pod UID and container name.
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+                  separator     = "/"
+                  target_label  = "__path__"
+                  replacement   = "/var/log/pods/*$1/*.log"
+                }
+              }
+
+              // Match log files on the host filesystem.
+              local.file_match "pods" {
+                path_targets = discovery.relabel.pod_logs.output
+                sync_period  = "5s"
+              }
+
+              // Tail log files and forward to Loki.
+              loki.source.file "pods" {
+                targets    = local.file_match.pods.targets
+                forward_to = [loki.write.loki.receiver]
+              }
+
+              // Write to the in-cluster Loki instance.
+              loki.write "loki" {
+                endpoint {
+                  url = "http://loki.observability.svc.cluster.local:3100/loki/api/v1/push"
+                }
+              }

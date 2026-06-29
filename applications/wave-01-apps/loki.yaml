@@ -1,5 +1,3 @@
-# yaml-language-server: $schema=https://json.schemastore.org/yamllint.json
-
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -26,58 +24,62 @@ spec:
   source:
     chart: loki
     repoURL: https://grafana.github.io/helm-charts
-    targetRevision: 6.41.1
+    targetRevision: 7.0.0
     helm:
       values: |
+        # SingleBinary: one pod, filesystem backend, Longhorn PVC — no object storage needed.
+        deploymentMode: SingleBinary
+
         loki:
-          enabled: true
-          
-          persistence:
-            enabled: false
-          
-          compactor:
-            enabled: true
-            retention_enabled: true
-            working_directory: /var/loki/compactor
-
-          # 1. CRITICAL: Define storage keys for Helm template helpers
-          storage:
-            type: s3
-            bucketNames:
-              chunks: loki-logs 
-              ruler: loki-ruler
-              admin: loki-admin
-            
-          # 2. CRITICAL: Define the core Loki config block as a map under the 'config' key
-          config:
-            limits_config:
-              retention_period: 2160h # 90d
-
-            schema_config: # This section satisfies the validation and config map
-              configs:
-              - from: 2020-10-24
-                store: tsdb 
-                object_store: s3
-                schema: v12
+          # Fresh v7 install uses schema v13 + tsdb + filesystem.
+          schemaConfig:
+            configs:
+              - from: "2024-04-01"
+                store: tsdb
+                object_store: filesystem
+                schema: v13
                 index:
                   prefix: index_
                   period: 24h
 
-            storage_config:
-              tsdb:
-                dir: /var/loki/tsdb
-              
-            # The 'aws' block MUST be defined as part of the config file
-            aws: 
-              endpoint: minio.minio.svc.cluster.local:9000
-              region: us-east-1
-              bucketnames: loki-logs
-              insecure: true
-              access_key_id: admin
-              secret_access_key: admin1234
-            
-        # Disable Promtail and Gateway as planned
-        promtail:
-          enabled: false
+          storage:
+            type: filesystem
+
+          limits_config:
+            retention_period: 2160h  # 90 days
+
+          compactor:
+            delete_request_store: filesystem
+            retention_enabled: true
+
+          analytics:
+            reporting_enabled: false
+
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 100m
+            limits:
+              memory: 2Gi
+              cpu: 500m
+
+        singleBinary:
+          replicas: 1
+          persistence:
+            volumeClaimsEnabled: true
+            size: 20Gi
+            storageClass: longhorn
+
+        # Disable SimpleScalable components — not used in SingleBinary mode.
+        read:
+          replicas: 0
+        write:
+          replicas: 0
+        backend:
+          replicas: 0
+
+        # Gateway and test component not needed for this deployment.
         gateway:
+          enabled: false
+        lokiCanary:
           enabled: false
