@@ -34,7 +34,6 @@ spec:
         prometheus:
           podDisruptionBudget:
             enabled: true
-            maxUnavailable: 0
           service:
             type: NodePort
             nodePort: 30002
@@ -68,7 +67,6 @@ spec:
           enabled: true
           podDisruptionBudget:
             enabled: true
-            maxUnavailable: 0
           service:
             type: NodePort
             nodePort: 30004
