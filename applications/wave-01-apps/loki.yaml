@@ -81,6 +81,12 @@ spec:
         gateway:
           enabled: false
 
+        # Not needed with filesystem storage — would stay Pending with no scheduling reason.
+        chunksCache:
+          enabled: false
+        resultsCache:
+          enabled: false
+
         # lokiCanary is required by the chart's validate.yaml — cannot be disabled.
         lokiCanary:
           enabled: true
