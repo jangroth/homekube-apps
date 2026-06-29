@@ -78,8 +78,16 @@ spec:
         backend:
           replicas: 0
 
-        # Gateway and test component not needed for this deployment.
         gateway:
           enabled: false
+
+        # lokiCanary is required by the chart's validate.yaml — cannot be disabled.
         lokiCanary:
-          enabled: false
+          enabled: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
