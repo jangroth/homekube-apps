@@ -115,6 +115,7 @@ spec:
               group_interval: 5m
               repeat_interval: 12h
             receivers:
+              - name: "null"
               - name: telegram
                 telegram_configs:
                   - chat_id: 173229021
