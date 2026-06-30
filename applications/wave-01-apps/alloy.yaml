@@ -87,12 +87,16 @@ spec:
                   target_label  = "job"
                 }
 
-                // Build the log file path from pod UID and container name.
+                // Build the log file path from namespace + pod name + container.
+                // Using namespace_podname_* (wildcard for UID) instead of pod UID so that
+                // static pods (apiserver, etcd, etc.) are matched — their mirror pod UID in
+                // the API differs from the kubelet-assigned UID on the filesystem.
                 rule {
-                  source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+                  source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_name", "__meta_kubernetes_pod_container_name"]
                   separator     = "/"
+                  regex         = "(.+)/(.+)/(.+)"
                   target_label  = "__path__"
-                  replacement   = "/var/log/pods/*$1/*.log"
+                  replacement   = "/var/log/pods/$1_$2_*/$3/*.log"
                 }
               }
 
