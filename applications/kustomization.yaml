@@ -13,5 +13,6 @@ resources:
   - wave-01-apps/kube-prometheus.yaml
   - wave-01-apps/loki.yaml
   - wave-01-apps/alloy.yaml
+  - wave-01-apps/prometheus-extras.yaml
   # - wave-02-custom/longhorn-test.yaml
   # - wave-02-custom/cilium-test.yaml

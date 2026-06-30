@@ -27,9 +27,35 @@ spec:
     targetRevision: 87.0.1
     helm: # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
       values: |
-        # Grafana is disabled here; enabled and configured in capability 8 (kube-prometheus-grafana.yaml)
         grafana:
-          enabled: false
+          enabled: true
+          defaultDashboardsEnabled: true
+          defaultDashboardsTimezone: Australia/Sydney
+          persistence:
+            enabled: false
+          service:
+            type: LoadBalancer
+            annotations:
+              io.cilium/lb-ipam-ips: "192.168.86.243"
+          additionalDataSources:
+            - name: Loki
+              type: loki
+              url: http://loki.observability.svc.cluster.local:3100
+              access: proxy
+              isDefault: false
+          dashboards:
+            default:
+              longhorn:
+                gnetId: 13032
+                revision: 6     # re-verify against grafana.com/dashboards/13032 at install time
+                datasource: Prometheus
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 50m
+            limits:
+              memory: 512Mi
+              cpu: 200m
 
         prometheus:
           podDisruptionBudget:
@@ -67,10 +93,28 @@ spec:
           enabled: true
           podDisruptionBudget:
             enabled: true
+          config:
+            global:
+              resolve_timeout: 5m
+            route:
+              receiver: telegram
+              group_by: ['alertname', 'namespace']
+              group_wait: 30s
+              group_interval: 5m
+              repeat_interval: 12h
+            receivers:
+              - name: telegram
+                telegram_configs:
+                  - chat_id: 173229021
+                    bot_token_file: /etc/alertmanager/secrets/alertmanager-telegram/bot_token
+                    send_resolved: true
+                    parse_mode: HTML
           service:
             type: NodePort
             nodePort: 30004
           alertmanagerSpec:
+            secrets:
+              - alertmanager-telegram
             affinity:
               nodeAffinity:
                 requiredDuringSchedulingIgnoredDuringExecution:

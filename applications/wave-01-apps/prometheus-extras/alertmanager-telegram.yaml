@@ -1,0 +1,19 @@
+{
+  "kind": "SealedSecret",
+  "apiVersion": "bitnami.com/v1alpha1",
+  "metadata": {
+    "name": "alertmanager-telegram",
+    "namespace": "observability"
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "name": "alertmanager-telegram",
+        "namespace": "observability"
+      }
+    },
+    "encryptedData": {
+      "bot_token": "AgBDlSHs43UakUEzuka4rMpZwefncIgQAI1Guf6q08DXmp5fUJIZmIUYLMRkcRUv84db21E68Shc/CIQr9+axK1Owlm0FKlJ1KVVF2BpmBVYOkQq0vZ/hErd+fuV6HPc/tai5t44jDt7di/VzSf86dxcxtRvqxwZMlzepLdQWdC2fCcG5vtwVCzebA7lxfGLKnHMYtc8qiTkZlXjX8KEIwVYQPmWeKOeWK2PUGypFoGdcHb34N5xvm6AlxN8rGe0U1zs8i0bOHxpr60ZMAYyYOoBDOPCxRXiTPsDk5dyd9DcpXBOZ1msd9/eqlFV4wev78oMDEItEpX8V68KGH2xJLS/v8Tw379aItrvI2siHpGwpWEeb1M6avW6YJoea+1Jrx1O7H1r3DC0oCxWeulKsAB6PqJbChasiS1lV6R6bvgyxN5CTJ3rCS8YPI/SMOBDz/24/FJXheDl0VdN7IfhxAbRwgRS0nXbpxhz++WhoW0Z3/0v3Peqyhs5qiYhT+saM2veMzNrVskOtwYckSIL9yPuhPTKosawHiWdRQkjdW4ynyTcBtHLoidi9kjNxnlVDsUaH5Ezwncnmc5AprY8UxOpQFCZkQb56iAl4jrK7v0NbBUBxvyUuAQtSJJ6GoqynZ19+X6akBKswSxp8bTXG4BYSd4qCmBZM7mTeYjoDRQCAoEugqFzymbD8FqYpD+SxKgFxZv6aMeLlONEicMhl3IuCbS2Y8WHstALSChg1SmofXXwP9lCDTBVFHJJkL/G"
+    }
+  }
+}
