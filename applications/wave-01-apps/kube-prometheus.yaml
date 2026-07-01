@@ -79,6 +79,7 @@ spec:
               protocol: https
               cert_file: /etc/secrets/grafana-tls/tls.crt
               cert_key: /etc/secrets/grafana-tls/tls.key
+              root_url: https://192.168.86.243
             auth:
               disable_login_form: false
             auth.generic_oauth:
