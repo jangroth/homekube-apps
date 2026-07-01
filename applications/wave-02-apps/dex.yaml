@@ -1,0 +1,96 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dex
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dex
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  sources:
+    - repoURL: https://charts.dexidp.io
+      chart: dex
+      targetRevision: 0.24.1
+      helm:
+        values: |
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: node-role.kubernetes.io/control-plane
+                        operator: DoesNotExist
+
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 20m
+            limits:
+              memory: 256Mi
+              cpu: 200m
+
+          service:
+            type: LoadBalancer
+            annotations:
+              io.cilium/lb-ipam-ips: "192.168.86.244"
+
+          # Google OAuth clientID/clientSecret injected from sealed secret dex-google-oauth
+          envFrom:
+            - secretRef:
+                name: dex-google-oauth
+
+          config:
+            issuer: https://pi0.taild13083.ts.net/dex
+
+            storage:
+              type: kubernetes
+              config:
+                inCluster: true
+
+            web:
+              http: 0.0.0.0:5556
+
+            oauth2:
+              skipApprovalScreen: true
+              responseTypes:
+                - code
+
+            connectors:
+              - type: google
+                id: google
+                name: Google
+                config:
+                  clientID: $clientID
+                  clientSecret: $clientSecret
+                  redirectURI: https://pi0.taild13083.ts.net/dex/callback
+
+            staticClients:
+              - id: argocd
+                name: ArgoCD
+                secret: argocd-dex-client-secret
+                redirectURIs:
+                  - http://192.168.86.241/auth/callback
+              - id: grafana
+                name: Grafana
+                secret: grafana-dex-client-secret
+                redirectURIs:
+                  - https://192.168.86.243/login/generic_oauth
+
+            expiry:
+              signingKeys: 6h
+              idTokens: 24h
+
+    - repoURL: https://github.com/jangroth/homekube-apps.git
+      path: applications/wave-02-apps/dex-extras
+      targetRevision: HEAD

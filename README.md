@@ -24,7 +24,52 @@ See [spec 005](../docs/specs/005-production-cluster-setup.md) for full capabilit
 | kube-prometheus-stack (Prometheus + Alertmanager) | `observability` | 01 | 87.0.1 | Prometheus `:30002`, Alertmanager `:30004` |
 | Loki | `observability` | 01 | 7.0.0 | internal (`observability` svc) |
 | Alloy | `observability` | 01 | 1.8.1 | DaemonSet log shipper |
-| Grafana | `observability` | 01 | (kube-prometheus subchart) | `192.168.86.243:80` |
+| Grafana | `observability` | 01 | (kube-prometheus subchart) | `192.168.86.243:443` |
+| Dex | `dex` | 02 | 0.24.1 | `192.168.86.244:5556` (LAN), `https://pi0.taild13083.ts.net/dex` (browser/OIDC) |
+
+### Dex Google OAuth client (human step)
+
+Cap-9 (Identity & SSO) uses Google as the upstream identity provider via Dex. Complete these steps before deploying the `dex` ArgoCD Application.
+
+**1. Enable Tailscale HTTPS on pi0** (one-time, gives Dex a publicly trusted cert via Let's Encrypt):
+
+```sh
+ssh homekube@pi0
+tailscale cert pi0.taild13083.ts.net   # issues the cert, stored in /var/lib/tailscale/certs/
+```
+
+**2. Create the Google OAuth2 client** in [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
+- Application type: **Web application**
+- Name: `homekube-dex`
+- Authorized redirect URIs: `https://pi0.taild13083.ts.net/dex/callback`
+- Note the **Client ID** and **Client Secret**
+
+**3. Seal the credentials:**
+
+```sh
+kubectl create secret generic dex-google-oauth \
+  --from-literal=clientID=<GOOGLE_CLIENT_ID> \
+  --from-literal=clientSecret=<GOOGLE_CLIENT_SECRET> \
+  --namespace dex \
+  --dry-run=client -o yaml | \
+  kubeseal \
+    --controller-name sealed-secrets \
+    --controller-namespace kube-system \
+    --namespace dex \
+  > applications/wave-02-apps/dex-extras/dex-google-oauth.yaml
+```
+
+**4. After Dex is deployed**, configure `tailscale serve` on pi0 to proxy HTTPS → Dex LB VIP:
+
+```sh
+ssh homekube@pi0
+sudo tailscale serve --bg --https=443 http://192.168.86.244:5556
+# Verify: curl -s https://pi0.taild13083.ts.net/dex/.well-known/openid-configuration | jq .issuer
+```
+
+**5. Approve the Tailscale route** if prompted in the [Tailscale admin console](https://login.tailscale.com/admin).
+
+---
 
 ### Alertmanager Telegram secret (human step)
 
