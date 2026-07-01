@@ -8,6 +8,7 @@ resources:
   - wave-00-init/sealed-secrets.yaml
   - wave-00-init/cert-manager.yaml
   - wave-00-init/cert-manager-config.yaml
+  - wave-00-init/coredns-patch.yaml
   - wave-00-init/kubelet-csr-approver.yaml
   - wave-01-apps/longhorn-extras.yaml
   - wave-01-apps/kube-prometheus.yaml

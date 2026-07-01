@@ -40,8 +40,25 @@ spec:
               memory: 256Mi
               cpu: 200m
 
+          volumes:
+            - name: tls
+              secret:
+                secretName: dex-tls
+
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/dex/tls
+              readOnly: true
+
           service:
             type: LoadBalancer
+            ports:
+              http:
+                port: 5556
+                targetPort: http
+              https:
+                port: 443
+                targetPort: https
             annotations:
               io.cilium/lb-ipam-ips: "192.168.86.244"
 
@@ -60,6 +77,9 @@ spec:
 
             web:
               http: 0.0.0.0:5556
+              https: 0.0.0.0:5557
+              tlsCert: /etc/dex/tls/tls.crt
+              tlsKey: /etc/dex/tls/tls.key
 
             oauth2:
               skipApprovalScreen: true

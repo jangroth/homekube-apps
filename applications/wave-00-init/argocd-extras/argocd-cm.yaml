@@ -10,6 +10,7 @@ data:
     issuer: https://pi0.taild13083.ts.net/dex
     clientID: argocd
     clientSecret: argocd-dex-client-secret
+    insecureSkipVerify: true
     requestedScopes:
       - openid
       - profile
