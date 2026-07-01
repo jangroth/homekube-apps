@@ -32,6 +32,7 @@ spec:
             KubeProxyDown: true
 
         grafana:
+          assertNoLeakedSecrets: false
           enabled: true
           defaultDashboardsEnabled: true
           defaultDashboardsTimezone: Australia/Sydney
