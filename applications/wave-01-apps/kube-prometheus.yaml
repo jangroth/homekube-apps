@@ -99,6 +99,16 @@ spec:
               secretName: grafana-tls
               mountPath: /etc/secrets/grafana-tls
               readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+              scheme: HTTPS
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+              scheme: HTTPS
 
         prometheus:
           podDisruptionBudget:
