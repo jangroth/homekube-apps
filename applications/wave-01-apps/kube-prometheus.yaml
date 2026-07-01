@@ -39,6 +39,7 @@ spec:
             enabled: false
           service:
             type: LoadBalancer
+            port: 443
             annotations:
               io.cilium/lb-ipam-ips: "192.168.86.243"
           additionalDataSources:
@@ -72,6 +73,31 @@ spec:
             limits:
               memory: 512Mi
               cpu: 200m
+          grafana.ini:
+            server:
+              protocol: https
+              cert_file: /etc/secrets/grafana-tls/tls.crt
+              cert_key: /etc/secrets/grafana-tls/tls.key
+            auth:
+              disable_login_form: false
+            auth.generic_oauth:
+              enabled: true
+              name: Google (via Dex)
+              client_id: grafana
+              client_secret: grafana-dex-client-secret
+              scopes: openid email profile
+              auth_url: https://pi0.taild13083.ts.net/dex/auth
+              token_url: http://dex.dex.svc.cluster.local:5556/dex/token
+              api_url: http://dex.dex.svc.cluster.local:5556/dex/userinfo
+              allowed_emails: jan.groth.de@gmail.com
+              use_pkce: true
+              role_attribute_path: "email == 'jan.groth.de@gmail.com' && 'Admin' || 'Viewer'"
+              auto_login: false
+          extraSecretMounts:
+            - name: grafana-tls
+              secretName: grafana-tls
+              mountPath: /etc/secrets/grafana-tls
+              readOnly: true
 
         prometheus:
           podDisruptionBudget:
