@@ -1,0 +1,20 @@
+# homekube-CA public cert (same PEM as in homekube-main's argocd-helm-values.yaml).
+# Mounted into the pod and trusted via NODE_EXTRA_CA_CERTS so the ArgoCD widget
+# can fetch over in-cluster HTTPS (argocd-server serves a homekube-ca cert).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homekube-ca
+  namespace: homepage
+data:
+  homekube-ca.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIBcDCCARagAwIBAgIUSf9VR+890wUgUZ1h8wCRr6GA7uwwCgYIKoZIzj0EAwIw
+    FjEUMBIGA1UEAxMLaG9tZWt1YmUtY2EwHhcNMjYwNjE3MDQ1MDMyWhcNMzYwNjE0
+    MDQ1MDMyWjAWMRQwEgYDVQQDEwtob21la3ViZS1jYTBZMBMGByqGSM49AgEGCCqG
+    SM49AwEHA0IABPQeFiJdqorOUyttROs9KRaYAijiazWfsBPVVa7xrBgihA/pY3mK
+    Is4OXPgh7XIxFszEj6B3Waq7sVtveJuwGU2jQjBAMA4GA1UdDwEB/wQEAwICpDAP
+    BgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQPA6nWBdIzpaLGXrwAK/7BywHxfzAK
+    BggqhkjOPQQDAgNIADBFAiAqQsWCyR89x9zOhJ+2gWEBDEcWRVkcfc+rYYuPVQDo
+    cgIhAPoIHcIx/+8VDaNFmE7EtKWzB9EcqE+nTpdwX/tcwIqv
+    -----END CERTIFICATE-----

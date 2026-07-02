@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homepage
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: homepage
+    spec:
+      serviceAccountName: homepage
+      automountServiceAccountToken: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: DoesNotExist
+      containers:
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:v1.13.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "192.168.86.245"
+            # ArgoCD widget fetches https://argocd-server.argocd.svc (homekube-ca cert);
+            # Node.js rejects untrusted CAs without this.
+            - name: NODE_EXTRA_CA_CERTS
+              value: /etc/ssl/certs/homekube/homekube-ca.crt
+          envFrom:
+            - secretRef:
+                name: homepage-widget-secrets
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          # Probe / not /api/*: the HOMEPAGE_ALLOWED_HOSTS middleware only matches
+          # /api/* and would 400 kubelet probes (Host: <podIP>:3000).
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 20m
+            limits:
+              memory: 256Mi
+              cpu: 500m
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+            - name: logs
+              mountPath: /app/config/logs
+            - name: homekube-ca
+              mountPath: /etc/ssl/certs/homekube
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: homepage
+        - name: logs
+          emptyDir: {}
+        - name: homekube-ca
+          configMap:
+            name: homekube-ca

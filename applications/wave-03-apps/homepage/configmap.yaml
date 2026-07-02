@@ -1,0 +1,86 @@
+# Homepage config files, mounted verbatim at /app/config.
+# Editing the dashboard = editing this file + ArgoCD sync.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  namespace: homepage
+data:
+  settings.yaml: |
+    title: homekube
+    headerStyle: clean
+  kubernetes.yaml: |
+    mode: cluster
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: homekube
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - search:
+        provider: duckduckgo
+        target: _blank
+    - datetime:
+        text_size: xl
+        format:
+          dateStyle: long
+          timeStyle: short
+          hour12: false
+  services.yaml: |
+    - GitOps:
+        - ArgoCD:
+            icon: argo-cd.png
+            href: https://192.168.86.241
+            description: GitOps controller
+            widget:
+              type: argocd
+              url: https://argocd-server.argocd.svc
+              key: "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}"
+    - Storage:
+        - Longhorn:
+            icon: longhorn.png
+            href: http://192.168.86.242
+            description: Distributed block storage
+            widget:
+              type: longhorn
+              url: http://longhorn-frontend.longhorn-system.svc
+    - Observability:
+        - Grafana:
+            icon: grafana.png
+            href: https://192.168.86.243
+            description: Dashboards (link only — spec 007 OQ2)
+        - Prometheus:
+            icon: prometheus.png
+            href: http://pi0:30002
+            description: Metrics
+            widget:
+              type: prometheus
+              url: http://prometheus-kube-prometheus-prometheus.observability.svc:9090
+        - Alertmanager:
+            icon: alertmanager.png
+            href: http://pi0:30004
+            description: Alert routing
+    - Identity:
+        - Dex:
+            icon: dex.png
+            href: https://pi0.taild13083.ts.net/dex
+            description: OIDC federation (Google)
+  bookmarks.yaml: |
+    - Repos:
+        - homekube:
+            - icon: github.png
+              href: https://github.com/jangroth/homekube
+        - homekube-apps:
+            - icon: github.png
+              href: https://github.com/jangroth/homekube-apps
+    - Docs:
+        - Homepage:
+            - icon: homepage.png
+              href: https://gethomepage.dev

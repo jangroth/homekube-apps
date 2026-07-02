@@ -97,6 +97,35 @@ kubectl create secret generic alertmanager-telegram \
 
 ---
 
+### Homepage widget credentials (human step)
+
+The Homepage dashboard ([spec 007](../docs/specs/007-homepage-dashboard.md)) authenticates its ArgoCD widget with an API token. The token cannot be pre-generated in source — it is minted imperatively and committed as a sealed secret. On a cluster rebuild, re-mint and re-seal (same recovery story as the other sealed secrets on this page).
+
+> Grafana gets a **link only, no widget**: Homepage's Grafana widget unconditionally calls `/api/admin/stats`, which requires Grafana server-admin credentials — unacceptable in the pod env of an unauthenticated dashboard. See spec 007, Open Question 2.
+
+**1. ArgoCD API token.** The `homepage` local account (`apiKey` capability, `role:readonly`) is declared in the ArgoCD Helm values in `homekube-main` (`ansible/roles/gitops/files/argocd-helm-values.yaml`) — only the token is minted by hand:
+
+```sh
+argocd login 192.168.86.241 --username admin --insecure --grpc-web
+argocd account generate-token --account homepage
+```
+
+**2. Seal the token:**
+
+```sh
+kubectl create secret generic homepage-widget-secrets \
+  --from-literal=HOMEPAGE_VAR_ARGOCD_TOKEN=<ARGOCD_TOKEN> \
+  --namespace homepage \
+  --dry-run=client -o yaml | \
+  kubeseal \
+    --controller-name sealed-secrets \
+    --controller-namespace kube-system \
+    --namespace homepage \
+  > applications/wave-03-apps/homepage/sealedsecret.yaml
+```
+
+---
+
 ## Wave Structure
 
 | Wave | Purpose |
