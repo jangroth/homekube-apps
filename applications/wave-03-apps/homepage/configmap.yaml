@@ -6,6 +6,13 @@ metadata:
   name: homepage
   namespace: homepage
 data:
+  # docker.yaml / custom.css / custom.js are unused but must exist: /app/config
+  # is a read-only configMap mount, and homepage crashes trying to skeleton-copy
+  # any missing config file into it (EROFS).
+  docker.yaml: ""
+  proxmox.yaml: ""
+  custom.css: ""
+  custom.js: ""
   settings.yaml: |
     title: homekube
     headerStyle: clean
