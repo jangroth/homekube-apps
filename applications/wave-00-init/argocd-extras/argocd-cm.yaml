@@ -4,7 +4,7 @@ metadata:
   name: argocd-cm
   namespace: argocd
 data:
-  url: http://192.168.86.241
+  url: https://192.168.86.241
   oidc.config: |
     name: Google (via Dex)
     issuer: https://pi0.taild13083.ts.net/dex

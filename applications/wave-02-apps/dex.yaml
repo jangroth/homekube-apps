@@ -99,7 +99,7 @@ spec:
                 name: ArgoCD
                 secret: argocd-dex-client-secret
                 redirectURIs:
-                  - http://192.168.86.241/auth/callback
+                  - https://192.168.86.241/auth/callback
               - id: grafana
                 name: Grafana
                 secret: grafana-dex-client-secret
