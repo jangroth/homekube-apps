@@ -49,6 +49,13 @@ data:
     - search:
         provider: duckduckgo
         target: _blank
+    - openmeteo:
+        label: Cronulla
+        latitude: -34.06
+        longitude: 151.15
+        timezone: Australia/Sydney
+        units: metric
+        cache: 5
     - datetime:
         text_size: xl
         format:
@@ -74,7 +81,7 @@ data:
         - Grafana:
             icon: grafana.png
             href: https://192.168.86.243
-            description: Dashboards (link only — spec 007 OQ2)
+            description: Dashboards
         - Prometheus:
             icon: prometheus.png
             href: http://pi0:30002
