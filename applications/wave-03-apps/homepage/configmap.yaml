@@ -96,7 +96,8 @@ data:
             description: Alert routing
     - Identity:
         - Dex:
-            icon: dex.png
+            # No dex icon in dashboard-icons/selfh.st — use upstream's own logo
+            icon: https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png
             href: https://pi0.taild13083.ts.net/dex
             description: OIDC federation (Google)
   bookmarks.yaml: |
