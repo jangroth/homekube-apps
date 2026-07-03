@@ -26,6 +26,7 @@ See [spec 005](../docs/specs/005-production-cluster-setup.md) for full capabilit
 | Alloy | `observability` | 01 | 1.8.1 | DaemonSet log shipper |
 | Grafana | `observability` | 01 | (kube-prometheus subchart) | `192.168.86.243:443` |
 | Dex | `dex` | 02 | 0.24.1 | `192.168.86.244:5556` (LAN), `https://pi0.taild13083.ts.net/dex` (browser/OIDC) |
+| Homepage | `homepage` | 03 | — (raw manifests, image v1.13.2) | `192.168.86.245:80` |
 
 ### Dex Google OAuth client (human step)
 
@@ -133,7 +134,7 @@ kubectl create secret generic homepage-widget-secrets \
 | `-1` (`wave-00-init`) | Foundation: secrets, TLS, node hygiene, load balancer, storage |
 | `01` (`wave-01-apps`) | Observability: metrics, logs, dashboards |
 | `02` | Identity & SSO |
-| `03` | Service mesh, backups |
+| `03` (`wave-03-apps`) | Cluster dashboard; later: service mesh, backups |
 
 ---
 

@@ -16,6 +16,14 @@ data:
   settings.yaml: |
     title: homekube
     headerStyle: clean
+    # Placeholder background (from the gethomepage docs example) — swap at will.
+    background:
+      image: https://images.unsplash.com/photo-1502790671504-542ad42d5189?auto=format&fit=crop&w=2560&q=80
+      blur: sm
+      saturate: 50
+      brightness: 50
+      opacity: 50
+    cardBlur: sm
   kubernetes.yaml: |
     mode: cluster
   widgets.yaml: |
@@ -31,6 +39,13 @@ data:
           cpu: true
           memory: true
           showLabel: true
+    # Longhorn is an *info* widget in homepage, not a service widget.
+    - longhorn:
+        url: http://longhorn-frontend.longhorn-system.svc
+        expanded: true
+        total: true
+        labels: true
+        nodes: false
     - search:
         provider: duckduckgo
         target: _blank
@@ -55,9 +70,6 @@ data:
             icon: longhorn.png
             href: http://192.168.86.242
             description: Distributed block storage
-            widget:
-              type: longhorn
-              url: http://longhorn-frontend.longhorn-system.svc
     - Observability:
         - Grafana:
             icon: grafana.png
@@ -87,6 +99,9 @@ data:
         - homekube-apps:
             - icon: github.png
               href: https://github.com/jangroth/homekube-apps
+        - homekube-main:
+            - icon: github.png
+              href: https://github.com/jangroth/homekube-main
     - Docs:
         - Homepage:
             - icon: homepage.png
