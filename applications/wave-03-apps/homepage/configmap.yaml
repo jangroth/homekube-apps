@@ -24,6 +24,10 @@ data:
       brightness: 50
       opacity: 50
     cardBlur: sm
+    # Info widgets (longhorn) read their backend from providers, not widgets.yaml.
+    providers:
+      longhorn:
+        url: http://longhorn-frontend.longhorn-system.svc
   kubernetes.yaml: |
     mode: cluster
   widgets.yaml: |
@@ -40,15 +44,12 @@ data:
           memory: true
           showLabel: true
     # Longhorn is an *info* widget in homepage, not a service widget.
+    # Its URL lives in settings.yaml under providers.
     - longhorn:
-        url: http://longhorn-frontend.longhorn-system.svc
         expanded: true
         total: true
         labels: true
         nodes: false
-    - search:
-        provider: duckduckgo
-        target: _blank
     - openmeteo:
         label: Cronulla
         latitude: -34.06
