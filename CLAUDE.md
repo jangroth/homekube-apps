@@ -16,9 +16,10 @@ ArgoCD runs on the cluster and watches this repo. A single root application (`ap
 
 | Wave | Sync Order | Apps |
 |------|-----------|------|
-| `wave-00-init` | First | Cilium LB (pool + L2 policy), metrics-server, ArgoCD config, sealed-secrets, cert-manager, kubelet-csr-approver |
-| `wave-01-apps` | After init | Kubernetes Dashboard, kube-prometheus, Loki, MinIO, Longhorn extras |
-| `wave-02-custom` | Last | Cilium test, Longhorn test |
+| `wave-00-init` | First | Cilium LB (pool + L2 policy), Longhorn, metrics-server, ArgoCD config, sealed-secrets, cert-manager (+ config), CoreDNS patch, kubelet-csr-approver |
+| `wave-01-apps` | After init | Longhorn extras, kube-prometheus, Loki, Alloy, Prometheus extras (Alertmanager Telegram) |
+| `wave-02-apps` | After apps | Dex (OIDC) |
+| `wave-03-apps` | Last | Homepage dashboard |
 
 Wave is set via annotation: `argocd.argoproj.io/sync-wave: "N"`
 
@@ -38,7 +39,9 @@ Wave is set via annotation: `argocd.argoproj.io/sync-wave: "N"`
 |------|---------|
 | `applications/kustomization.yaml` | Root kustomization — lists all app manifests |
 | `applications/wave-00-init/` | Foundation apps (load balancer, storage, metrics) |
-| `applications/wave-01-apps/` | Observability and storage UI |
+| `applications/wave-01-apps/` | Observability and storage extras |
+| `applications/wave-02-apps/` | OIDC (Dex) |
+| `applications/wave-03-apps/` | Dashboard (Homepage) |
 | `manual/` | One-off manifests for testing/debugging (not managed by ArgoCD) |
 
 ---
