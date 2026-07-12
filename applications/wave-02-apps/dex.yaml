@@ -109,7 +109,6 @@ spec:
             expiry:
               signingKeys: 6h
               idTokens: 24h
-
     - repoURL: https://github.com/jangroth/homekube-apps.git
       path: applications/wave-02-apps/dex-extras
       targetRevision: HEAD
