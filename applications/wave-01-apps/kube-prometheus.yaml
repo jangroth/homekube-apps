@@ -110,6 +110,11 @@ spec:
               path: /api/health
               port: 3000
               scheme: HTTPS
+          serviceMonitor:
+            scheme: https
+            tlsConfig:
+              caFile: /etc/prometheus/configmaps/homekube-ca/homekube-ca.crt
+              serverName: prometheus-grafana.observability.svc.cluster.local
 
         prometheus:
           podDisruptionBudget:
@@ -122,6 +127,8 @@ spec:
             retention: 15d
             retentionSize: 40GiB
             serviceMonitorSelectorNilUsesHelmValues: false
+            configMaps:
+              - homekube-ca
             storageSpec:
               volumeClaimTemplate:
                 spec:

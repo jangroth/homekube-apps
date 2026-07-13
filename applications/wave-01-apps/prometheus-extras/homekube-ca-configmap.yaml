@@ -1,0 +1,20 @@
+# homekube-CA public cert, same PEM as homepage/ca-configmap.yaml.
+# Mounted into Prometheus (spec.configMaps) so it can verify the grafana-tls
+# cert when scraping Grafana's /metrics over HTTPS.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homekube-ca
+  namespace: observability
+data:
+  homekube-ca.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIBcDCCARagAwIBAgIUSf9VR+890wUgUZ1h8wCRr6GA7uwwCgYIKoZIzj0EAwIw
+    FjEUMBIGA1UEAxMLaG9tZWt1YmUtY2EwHhcNMjYwNjE3MDQ1MDMyWhcNMzYwNjE0
+    MDQ1MDMyWjAWMRQwEgYDVQQDEwtob21la3ViZS1jYTBZMBMGByqGSM49AgEGCCqG
+    SM49AwEHA0IABPQeFiJdqorOUyttROs9KRaYAijiazWfsBPVVa7xrBgihA/pY3mK
+    Is4OXPgh7XIxFszEj6B3Waq7sVtveJuwGU2jQjBAMA4GA1UdDwEB/wQEAwICpDAP
+    BgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQPA6nWBdIzpaLGXrwAK/7BywHxfzAK
+    BggqhkjOPQQDAgNIADBFAiAqQsWCyR89x9zOhJ+2gWEBDEcWRVkcfc+rYYuPVQDo
+    cgIhAPoIHcIx/+8VDaNFmE7EtKWzB9EcqE+nTpdwX/tcwIqv
+    -----END CERTIFICATE-----
