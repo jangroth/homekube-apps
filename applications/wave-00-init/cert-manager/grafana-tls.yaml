@@ -10,5 +10,7 @@ spec:
   issuerRef:
     name: homekube-ca
     kind: ClusterIssuer
+  dnsNames:
+    - prometheus-grafana.observability.svc.cluster.local
   ipAddresses:
     - 192.168.86.243
