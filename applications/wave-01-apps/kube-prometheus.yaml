@@ -118,6 +118,7 @@ spec:
             type: NodePort
             nodePort: 30002
           prometheusSpec:
+            externalUrl: http://pi0.taild13083.ts.net:30002
             retention: 15d
             retentionSize: 40GiB
             serviceMonitorSelectorNilUsesHelmValues: false
@@ -167,7 +168,7 @@ spec:
                     message: |-
                       {{ range .Alerts -}}
                       <b>[{{ .Status | toUpper }}]</b> {{ .Labels.alertname }}{{ with .Labels.namespace }} · {{ . }}{{ end }}
-                      {{ with .Annotations.summary }}{{ . }}
+                      {{ with .Annotations.summary }}{{ . | reReplaceAll "&" "&amp;" | reReplaceAll "<" "&lt;" | reReplaceAll ">" "&gt;" }}
                       {{ end -}}<a href="{{ .GeneratorURL }}">View in Prometheus</a>
                       {{ end }}
           service:
