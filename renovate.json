@@ -1,0 +1,32 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "schedule:weekly"
+  ],
+  "enabledManagers": ["argocd", "kubernetes"],
+  "argocd": {
+    "fileMatch": [
+      "^applications/.+\\.yaml$"
+    ]
+  },
+  "kubernetes": {
+    "fileMatch": [
+      "^applications/.+\\.yaml$"
+    ]
+  },
+  "automerge": false,
+  "labels": ["dependencies"],
+  "assignees": ["jangroth"],
+  "reviewers": ["jangroth"],
+  "prConcurrentLimit": 5,
+  "packageRules": [
+    {
+      "description": "Group minor and patch Helm chart updates to reduce PR noise",
+      "matchManagers": ["argocd"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "Helm chart minor/patch updates",
+      "groupSlug": "helm-minor-patch"
+    }
+  ]
+}
