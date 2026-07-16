@@ -115,6 +115,22 @@ spec:
             tlsConfig:
               caFile: /etc/prometheus/configmaps/homekube-ca/homekube-ca.crt
               serverName: prometheus-grafana.observability.svc.cluster.local
+          sidecar:
+            resources:
+              requests:
+                memory: 32Mi
+                cpu: 5m
+              limits:
+                memory: 64Mi
+                cpu: 50m
+          downloadDashboards:
+            resources:
+              requests:
+                memory: 32Mi
+                cpu: 5m
+              limits:
+                memory: 64Mi
+                cpu: 50m
 
         prometheus:
           podDisruptionBudget:
@@ -216,3 +232,20 @@ spec:
             limits:
               memory: 256Mi
               cpu: 100m
+
+        prometheusOperator:
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 10m
+            limits:
+              memory: 256Mi
+              cpu: 200m
+          prometheusConfigReloader:
+            resources:
+              requests:
+                memory: 32Mi
+                cpu: 5m
+              limits:
+                memory: 64Mi
+                cpu: 50m
