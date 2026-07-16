@@ -26,8 +26,18 @@ spec:
       values: |
         preUpgradeChecker:
           jobEnabled: false
+        longhornManager:
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
         defaultSettings:
           defaultDataPath: "/storage"
           defaultReplicaCount: 2
+          systemManagedCSIComponentsResourceLimits: >-
+            {"csi-attacher":{"requests":{"cpu":"25m","memory":"32Mi"},"limits":{"cpu":"50m","memory":"64Mi"}},"csi-provisioner":{"requests":{"cpu":"25m","memory":"32Mi"},"limits":{"cpu":"50m","memory":"64Mi"}},"csi-resizer":{"requests":{"cpu":"25m","memory":"32Mi"},"limits":{"cpu":"50m","memory":"64Mi"}},"csi-snapshotter":{"requests":{"cpu":"25m","memory":"32Mi"},"limits":{"cpu":"50m","memory":"64Mi"}},"longhorn-csi-plugin":{"requests":{"cpu":"50m","memory":"64Mi"},"limits":{"cpu":"100m","memory":"128Mi"}},"node-driver-registrar":{"requests":{"cpu":"10m","memory":"16Mi"},"limits":{"cpu":"25m","memory":"32Mi"}},"longhorn-liveness-probe":{"requests":{"cpu":"10m","memory":"16Mi"},"limits":{"cpu":"25m","memory":"32Mi"}}}
         persistence:
           defaultClassReplicaCount: 2
