@@ -33,14 +33,15 @@ spec:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
               effect: NoSchedule
-          configReloader:
-            resources:
-              requests:
-                memory: 32Mi
-                cpu: 5m
-              limits:
-                memory: 64Mi
-                cpu: 50m
+
+        configReloader:
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 5m
+            limits:
+              memory: 64Mi
+              cpu: 50m
 
         alloy:
           mounts:
@@ -53,7 +54,7 @@ spec:
               memory: 128Mi
               cpu: 50m
             limits:
-              memory: 256Mi
+              memory: 384Mi
               cpu: 200m
 
           configMap:
