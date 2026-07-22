@@ -123,6 +123,14 @@ spec:
               limits:
                 memory: 192Mi
                 cpu: 50m
+            datasources:
+              reloadURL: "https://localhost:3000/api/admin/provisioning/datasources/reload"
+              env:
+                REQ_SKIP_TLS_VERIFY: "true"
+            dashboards:
+              reloadURL: "https://localhost:3000/api/admin/provisioning/dashboards/reload"
+              env:
+                REQ_SKIP_TLS_VERIFY: "true"
           downloadDashboards:
             resources:
               requests:
