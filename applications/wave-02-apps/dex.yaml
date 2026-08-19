@@ -105,6 +105,11 @@ spec:
                 secret: grafana-dex-client-secret
                 redirectURIs:
                   - https://192.168.86.243/login/generic_oauth
+              - id: hermes
+                name: Hermes
+                public: true
+                redirectURIs:
+                  - https://192.168.86.246/auth/callback
 
             expiry:
               signingKeys: 6h
