@@ -100,6 +100,11 @@ data:
             icon: https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png
             href: https://pi0.taild13083.ts.net/dex
             description: OIDC federation (Google)
+    - AI:
+        - Hermes:
+            icon: mdi-robot-outline
+            href: https://192.168.86.246
+            description: Hermes Agent (Dex login)
   bookmarks.yaml: |
     - Repos:
         - homekube:
