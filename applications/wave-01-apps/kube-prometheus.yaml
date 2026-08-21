@@ -34,6 +34,8 @@ spec:
         grafana:
           assertNoLeakedSecrets: false
           enabled: true
+          admin:
+            existingSecret: prometheus-grafana-admin
           defaultDashboardsEnabled: true
           defaultDashboardsTimezone: Australia/Sydney
           persistence:
