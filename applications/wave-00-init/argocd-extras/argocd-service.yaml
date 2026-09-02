@@ -10,6 +10,15 @@ metadata:
     app.kubernetes.io/managed-by: argocd
   annotations:
     io.cilium/lb-ipam-ips: "192.168.86.241"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "ArgoCD"
+    gethomepage.dev/description: "GitOps controller"
+    gethomepage.dev/group: "GitOps"
+    gethomepage.dev/icon: "argo-cd.png"
+    gethomepage.dev/href: "https://192.168.86.241"
+    gethomepage.dev/widget.type: "argocd"
+    gethomepage.dev/widget.url: "https://argocd-server.argocd.svc"
+    gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}"
 spec:
   type: LoadBalancer
   ports:

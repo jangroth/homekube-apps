@@ -60,6 +60,12 @@ spec:
                 port: 443
             annotations:
               io.cilium/lb-ipam-ips: "192.168.86.244"
+              gethomepage.dev/enabled: "true"
+              gethomepage.dev/name: "Dex"
+              gethomepage.dev/description: "OIDC federation (Google)"
+              gethomepage.dev/group: "Identity"
+              gethomepage.dev/icon: "https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png"
+              gethomepage.dev/href: "https://pi0.taild13083.ts.net/dex"
 
           # Google OAuth clientID/clientSecret injected from sealed secret dex-google-oauth
           envFrom:
