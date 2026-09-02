@@ -64,25 +64,11 @@ data:
           timeStyle: short
           hour12: false
   services.yaml: |
-    - GitOps:
-        - ArgoCD:
-            icon: argo-cd.png
-            href: https://192.168.86.241
-            description: GitOps controller
-            widget:
-              type: argocd
-              url: https://argocd-server.argocd.svc
-              key: "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}"
-    - Storage:
-        - Longhorn:
-            icon: longhorn.png
-            href: http://192.168.86.242
-            description: Distributed block storage
+    # ArgoCD, Longhorn, Grafana, and Dex self-register via gethomepage.dev/* Service
+    # annotations and are discovered automatically (kubernetes.yaml mode: cluster).
+    # Prometheus and Alertmanager use NodePort and cannot self-register; Hermes is
+    # managed by an external chart and is kept here as a static entry.
     - Observability:
-        - Grafana:
-            icon: grafana.png
-            href: https://192.168.86.243
-            description: Dashboards
         - Prometheus:
             icon: prometheus.png
             href: http://pi0:30002
@@ -94,12 +80,6 @@ data:
             icon: alertmanager.png
             href: http://pi0:30004
             description: Alert routing
-    - Identity:
-        - Dex:
-            # No dex icon in dashboard-icons/selfh.st — use upstream's own logo
-            icon: https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png
-            href: https://pi0.taild13083.ts.net/dex
-            description: OIDC federation (Google)
     - AI:
         - Hermes:
             icon: mdi-robot-outline

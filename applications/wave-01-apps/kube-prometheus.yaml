@@ -45,6 +45,12 @@ spec:
             port: 443
             annotations:
               io.cilium/lb-ipam-ips: "192.168.86.243"
+              gethomepage.dev/enabled: "true"
+              gethomepage.dev/name: "Grafana"
+              gethomepage.dev/description: "Dashboards"
+              gethomepage.dev/group: "Observability"
+              gethomepage.dev/icon: "grafana.png"
+              gethomepage.dev/href: "https://192.168.86.243"
           additionalDataSources:
             - name: Loki
               type: loki
