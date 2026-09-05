@@ -208,6 +208,12 @@ spec:
                       {{ with .Annotations.summary }}{{ . | reReplaceAll "&" "&amp;" | reReplaceAll "<" "&lt;" | reReplaceAll ">" "&gt;" }}
                       {{ end -}}<a href="{{ .GeneratorURL }}">View in Prometheus</a>
                       {{ end }}
+            inhibit_rules:
+              - source_matchers:
+                  - alertname =~ "KubeDeploymentReplicasMismatch|KubePodNotReady"
+                target_matchers:
+                  - alertname = "TargetDown"
+                equal: ['namespace']
           service:
             type: NodePort
             nodePort: 30004
