@@ -50,18 +50,3 @@ Wave is set via annotation: `argocd.argoproj.io/sync-wave: "N"`
 
 After cluster setup: ArgoCD is exposed as LoadBalancer (VIP from Cilium LB-IPAM pool).
 `kubectl -n argocd get svc cst-argocd-server` to see the assigned IP.
-
----
-
-## Renovate
-
-`.github/workflows/renovate.yml` runs weekly (Monday 06:00 UTC) plus manual `workflow_dispatch`, scanning `applications/*.yaml` for outdated `argocd`/`kubernetes`-managed chart and image versions (`renovate.json`). Opens grouped PRs for review — `automerge` is off.
-
-Requires a `RENOVATE_TOKEN` repo secret (fine-grained PAT), not created by automation — manual, one-time setup:
-
-1. GitHub → Settings → Developer settings → Fine-grained tokens → new token
-2. Repository access: only this repo (`jangroth/homekube-apps`)
-3. Permissions: **Contents** (read/write), **Pull requests** (read/write) — no `github-actions` manager enabled, so no workflow-file permission needed
-4. Add as repo secret `RENOVATE_TOKEN`: Settings → Secrets and variables → Actions
-
-Trigger a run manually instead of waiting for the weekly cron: `gh workflow run renovate.yml --repo jangroth/homekube-apps`
