@@ -43,16 +43,23 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-          # Probe / not /api/*: the HOMEPAGE_ALLOWED_HOSTS middleware only matches
-          # /api/* and would 400 kubelet probes (Host: <podIP>:3000).
+          # v2 validates Host on every path (v1 only checked /api/*); kubelet's
+          # default Host (pod IP) fails HOMEPAGE_ALLOWED_HOSTS, so pin it to an
+          # allowed value instead.
           livenessProbe:
             httpGet:
               path: /
               port: http
+              httpHeaders:
+                - name: Host
+                  value: "192.168.86.245"
           readinessProbe:
             httpGet:
               path: /
               port: http
+              httpHeaders:
+                - name: Host
+                  value: "192.168.86.245"
           resources:
             requests:
               memory: 128Mi
