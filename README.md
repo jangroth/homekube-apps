@@ -128,6 +128,8 @@ Trigger a run manually instead of waiting for the weekly cron (Monday 06:00 UTC)
 gh workflow run renovate.yml --repo jangroth/homekube-apps
 ```
 
+> Renovate's Dependency Dashboard issue is always created in this repo, not `jangroth/homekube` — Renovate has no option to target a different repo for it. Exception to the single-tracker convention: it's a bot-managed, self-rewriting status report, not a tracked task.
+
 ---
 
 ## Wave Structure
