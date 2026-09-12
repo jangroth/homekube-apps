@@ -6,13 +6,13 @@
   ],
   "enabledManagers": ["argocd", "kubernetes"],
   "argocd": {
-    "fileMatch": [
-      "^applications/.+\\.yaml$"
+    "managerFilePatterns": [
+      "/^applications/.+\\.yaml$/"
     ]
   },
   "kubernetes": {
-    "fileMatch": [
-      "^applications/.+\\.yaml$"
+    "managerFilePatterns": [
+      "/^applications/.+\\.yaml$/"
     ]
   },
   "automerge": false,
