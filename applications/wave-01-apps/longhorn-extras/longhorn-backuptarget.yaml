@@ -1,0 +1,12 @@
+apiVersion: longhorn.io/v1beta2
+kind: BackupTarget
+metadata:
+  name: default
+  namespace: longhorn-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  backupTargetURL: s3://homekube-backups-010316939032-ap-southeast-2-an@ap-southeast-2/longhorn
+  credentialSecret: longhorn-backup-s3
+  pollInterval: 5m0s
