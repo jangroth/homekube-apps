@@ -4,7 +4,19 @@
     "config:recommended",
     "schedule:weekly"
   ],
-  "enabledManagers": ["argocd", "kubernetes", "github-actions"],
+  "enabledManagers": ["argocd", "kubernetes", "github-actions", "custom.regex"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Image tags pinned under helm.valuesObject, marked with a renovate comment",
+      "managerFilePatterns": [
+        "/^applications/.+\\.yaml$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s*tag: (?<currentValue>\\S+)"
+      ]
+    }
+  ],
   "argocd": {
     "managerFilePatterns": [
       "/^applications/.+\\.yaml$/"
@@ -27,6 +39,12 @@
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "Helm chart minor/patch updates",
       "groupSlug": "helm-minor-patch"
+    },
+    {
+      "description": "Only plain vX.Y.Z releases; skip rc, per-arch and desktop tags",
+      "matchDatasources": ["docker"],
+      "matchDepNames": ["nousresearch/hermes-agent", "tailscale/tailscale"],
+      "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+$/"
     }
   ]
 }
