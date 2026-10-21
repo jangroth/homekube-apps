@@ -28,3 +28,11 @@ spec:
     repoURL: https://github.com/jangroth/herminator.git
     path: chart
     targetRevision: HEAD
+    helm:
+      valuesObject:
+        image:
+          # renovate: datasource=docker depName=nousresearch/hermes-agent
+          tag: v0.22.2
+        tailscale:
+          # renovate: datasource=docker depName=tailscale/tailscale
+          tag: v1.104.2
