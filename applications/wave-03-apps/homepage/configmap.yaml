@@ -64,9 +64,7 @@ data:
           timeStyle: short
           hour12: false
   services.yaml: |
-    # Longhorn, Grafana, and Dex self-register via gethomepage.dev/* Service
-    # annotations (kubernetes.yaml mode: cluster). ArgoCD stays static for its widget key.
-    # Prometheus and Alertmanager use NodePort; Hermes is managed by an external chart.
+    # Static only: homepage discovers Ingress/HTTPRoute annotations, not Services.
     - GitOps:
         - ArgoCD:
             icon: argo-cd.png
@@ -76,7 +74,16 @@ data:
               type: argocd
               url: https://argocd-server.argocd.svc
               key: "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}"
+    - Storage:
+        - Longhorn:
+            icon: longhorn.png
+            href: http://192.168.86.242
+            description: Distributed block storage
     - Observability:
+        - Grafana:
+            icon: grafana.png
+            href: https://192.168.86.243
+            description: Dashboards
         - Prometheus:
             icon: prometheus.png
             href: http://pi0:30002
@@ -88,6 +95,11 @@ data:
             icon: alertmanager.png
             href: http://pi0:30004
             description: Alert routing
+    - Identity:
+        - Dex:
+            icon: https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png
+            href: https://pi0.taild13083.ts.net/dex
+            description: OIDC federation (Google)
     - AI:
         - Hermes:
             icon: mdi-robot-outline
@@ -104,6 +116,9 @@ data:
         - homekube-main:
             - icon: github.png
               href: https://github.com/jangroth/homekube-main
+        - herminator:
+            - icon: github.png
+              href: https://github.com/jangroth/herminator
     - Docs:
         - Homepage:
             - icon: homepage.png
