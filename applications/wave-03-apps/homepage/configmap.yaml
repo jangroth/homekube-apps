@@ -36,19 +36,12 @@ data:
         style: row
         columns: 4
       GitOps:
-        tab: Cluster
       Storage:
-        tab: Cluster
       Observability:
-        tab: Cluster
       Identity:
-        tab: Cluster
       AI:
-        tab: Apps
       Repos:
-        tab: Links
       Docs:
-        tab: Links
     # Info widgets (longhorn) read their backend from providers, not widgets.yaml.
     providers:
       longhorn:
