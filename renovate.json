@@ -43,7 +43,7 @@
     {
       "description": "Only plain vX.Y.Z releases; skip rc, per-arch and desktop tags",
       "matchDatasources": ["docker"],
-      "matchDepNames": ["nousresearch/hermes-agent", "tailscale/tailscale"],
+      "matchDepNames": ["nousresearch/hermes-agent", "tailscale/tailscale", "ghcr.io/betterleaks/betterleaks"],
       "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+$/"
     }
   ]
