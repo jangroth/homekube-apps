@@ -172,6 +172,9 @@ data:
         - herminator:
             - icon: github.png
               href: https://github.com/jangroth/herminator
+        - herminator-state:
+            - icon: github.png
+              href: https://github.com/jangroth/herminator-state
     - Docs:
         - Homepage:
             - icon: homepage.png
