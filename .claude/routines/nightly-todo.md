@@ -10,7 +10,7 @@ Run daily by the "homekube-apps - nightly todo" Claude Code routine. The routine
 | Schedule      | `0 16 * * *` (16:00 UTC daily)                                        |
 | Model         | claude-opus-5-5                                                       |
 | Allowed tools | Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch              |
-| Environment   | `claude-code-homekube-apps`, setup script: `bash /home/user/homekube-apps/scripts/cloud/setup.sh` |
+| Environment   | `claude-code-homekube-apps`, see [cloud-environment.md](cloud-environment.md)          |
 | Source        | `jangroth/homekube-apps`                                              |
 
 ## Prompt
@@ -26,4 +26,4 @@ GraphQL is blocked in cloud sessions, so `gh issue list` / `gh pr list` fail; us
 7. Implement the fix according to the rules in CLAUDE.md (App-of-Apps pattern, wave structure, Helm-values vs manifest ownership).
 8. Run `kubectl kustomize applications/` to verify the manifests render.
 9. Open a PR with `Closes jangroth/homekube#<number>` in the body. Assign it to jangroth and mark it for human review. Do not auto-merge.
-10. Do not modify this file or `scripts/cloud/setup.sh` unless the issue explicitly asks for it.
+10. Do not modify this file, `cloud-environment.md` or `scripts/cloud/setup.sh` unless the issue explicitly asks for it.
