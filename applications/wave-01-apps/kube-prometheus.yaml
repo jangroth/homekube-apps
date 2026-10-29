@@ -193,6 +193,9 @@ spec:
               routes:
                 - receiver: "null"
                   matchers:
+                    - alertname = InfoInhibitor
+                - receiver: "null"
+                  matchers:
                     - severity = info
             receivers:
               - name: "null"
