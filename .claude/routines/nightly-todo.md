@@ -1,35 +1,29 @@
-# homekube-apps nightly todo
+# Nightly todo routine
 
-Routine prompt stored here so it is versioned and reviewable.
-The claude.ai routine config should contain only: `Follow the instructions in .claude/routines/nightly-todo.md please`
+Run daily by the "homekube-apps - nightly todo" Claude Code routine. The routine prompt only points to this file.
 
-## Routine settings (as of 2026-10-28)
+## Routine settings
 
-| Setting       | Value                                                  |
-|---------------|--------------------------------------------------------|
-| Name          | homekube-apps - nightly todo                           |
-| Trigger ID    | trig_01P852NPoKhaxLW2pNwLoinN                          |
-| Schedule      | `0 16 * * *` (UTC — 16:00 daily)                      |
-| Model         | claude-sonnet-4-6                                      |
-| Allowed tools | Default (all tools available in the cloud session)     |
-| Repository    | jangroth/homekube-apps (branch: auto/issue-<n>-<slug>) |
+| Setting       | Value                                                                 |
+|---------------|-----------------------------------------------------------------------|
+| Trigger       | `trig_01P852NPoKhaxLW2pNwLoinN`                                       |
+| Schedule      | `0 16 * * *` (16:00 UTC daily)                                        |
+| Model         | claude-opus-5-5                                                       |
+| Allowed tools | Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch              |
+| Environment   | `claude-code-homekube-apps`, setup script: `bash /home/user/homekube-apps/scripts/cloud/setup.sh` |
+| Source        | `jangroth/homekube-apps`                                              |
 
 ## Prompt
 
-Your task:
+GraphQL is blocked in cloud sessions, so `gh issue list` / `gh pr list` fail; use `gh api` (REST).
 
-1. Fetch open GitHub issues directly from your tracker repository using the MCP GitHub tools or REST API (`gh api repos/jangroth/homekube/issues?state=open&labels=agent-safe,repo:homekube-apps`). Collect each issue's number, title, and body.
-
-2. Fetch open PRs in the current application repository (`jangroth/homekube-apps`). Collect each PR's number, head branch name, and body.
-
-3. Exclude any issue that already has an active PR. An issue is in flight if an open PR's branch matches `auto/issue-<number>-*` or its body contains a cross-repo closing keyword pointing to the tracker (e.g., `Closes jangroth/homekube#<number>` or `jangroth/homekube#<number>`).
-
-4. Select one eligible issue at random. If no issues remain, exit cleanly with a short summary.
-
-5. Spin up a new branch named `auto/issue-<number>-<slug>` from `main`.
-
-6. Implement the fix based on the architecture rules outlined in this repo's CLAUDE.md file (App-of-Apps pattern, wave structure, Helm-values vs manifest ownership).
-
-7. Validate that your Kubernetes configurations render successfully by running: `kubectl kustomize applications/`
-
-8. Open a new pull request. In the PR description, ensure you include `Closes jangroth/homekube#<number>` to trigger cross-repo issue closing. Assign it to `jangroth` and mark it for human review. Do not auto-merge.
+1. Attach the tracker repo for API access: `add_repo` with owner `jangroth`, repo `homekube`, access `push`.
+2. Fetch open issues labelled `agent-safe` and `repo:homekube-apps` from the tracker: `gh api "repos/jangroth/homekube/issues?state=open&labels=agent-safe,repo:homekube-apps&per_page=100" --jq '[.[] | {number, title, body}]'`
+3. Fetch open PRs in this repo: `gh api "repos/jangroth/homekube-apps/pulls?state=open&per_page=100" --jq '[.[] | {number, branch: .head.ref, body}]'`
+4. Exclude issues already in flight. An issue is in flight if an open PR's branch matches `auto/issue-<number>-*` or its body references it (e.g. `Closes jangroth/homekube#<number>` or `jangroth/homekube#<number>`).
+5. Pick one remaining issue at random. If none are eligible, exit cleanly with a summary of what was checked.
+6. Create a new branch named `auto/issue-<number>-<slug>` from `origin/main`.
+7. Implement the fix according to the rules in CLAUDE.md (App-of-Apps pattern, wave structure, Helm-values vs manifest ownership).
+8. Run `kubectl kustomize applications/` to verify the manifests render.
+9. Open a PR with `Closes jangroth/homekube#<number>` in the body. Assign it to jangroth and mark it for human review. Do not auto-merge.
+10. Do not modify this file or `scripts/cloud/setup.sh` unless the issue explicitly asks for it.
