@@ -136,7 +136,7 @@ gh workflow run renovate.yml --repo jangroth/homekube-apps
 
 A Claude Code cloud routine ("homekube-apps - nightly todo", daily 16:00 UTC / 02:00 AEST) picks up one open tracker issue labelled `agent-safe` + `repo:homekube-apps` and opens a PR for review. Its config lives in the repo:
 
-- `.claude/routines/nightly-todo.md` — the routine's instructions and settings; the routine prompt only points to this file
+- `.claude/routines/nightly-todo.md` — the routine's instructions and settings, including the exact routine prompt, which points to this file and authorises the branch, commit, push and PR
 - `.claude/routines/cloud-environment.md` — the cloud environment's settings: name, network allowlist, setup script
 - `scripts/cloud/setup.sh` — the cloud environment's setup script; the environment's script only runs `bash /home/user/homekube-apps/scripts/cloud/setup.sh`
 
