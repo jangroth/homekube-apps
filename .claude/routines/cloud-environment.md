@@ -11,10 +11,10 @@ The claude.ai cloud environment the nightly routine runs in. These settings exis
 
 ## Allowed domains
 
-| Domain                      | Needed for                                              |
-|-----------------------------|---------------------------------------------------------|
-| `github.com`                | Git clone and push                                      |
-| `api.github.com`            | `gh api` calls for issues and PRs                       |
-| `raw.githubusercontent.com` | `setup.sh` reads `kubernetes_version` from homekube-main |
-| `dl.k8s.io`                 | `kubectl` download                                      |
-| `cdn.dl.k8s.io`             | `kubectl` download (redirect target of `dl.k8s.io`)     |
+```
+github.com                 # git clone and push
+api.github.com             # gh api calls for issues and PRs
+raw.githubusercontent.com  # setup.sh reads kubernetes_version from homekube-main
+dl.k8s.io                  # kubectl download
+cdn.dl.k8s.io              # kubectl download (redirect target of dl.k8s.io)
+```
