@@ -1,0 +1,113 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infisical
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infisical
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  sources:
+    - repoURL: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
+      chart: infisical-standalone
+      targetRevision: 1.12.0
+      helm:
+        values: |
+          infisical:
+            fullnameOverride: infisical
+            replicaCount: 1
+            rolloutOnEveryRender: false
+            kubeSecretRef: infisical-secrets
+
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: node-role.kubernetes.io/control-plane
+                          operator: DoesNotExist
+
+            resources:
+              requests:
+                memory: 256Mi
+                cpu: 50m
+              limits:
+                memory: 768Mi
+                cpu: 500m
+
+            extraEnv:
+              - name: SITE_URL
+                value: https://192.168.86.247
+              - name: HTTPS_ENABLED
+                value: "true"
+
+            # Backend is HTTP-only; nginx terminates TLS for the infisical-https Service.
+            extraContainers:
+              - name: tls-proxy
+                image: nginxinc/nginx-unprivileged:1.31.7-alpine
+                ports:
+                  - name: https
+                    containerPort: 8443
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  runAsNonRoot: true
+                  runAsUser: 101
+                  seccompProfile:
+                    type: RuntimeDefault
+                  capabilities:
+                    drop: ["ALL"]
+                readinessProbe:
+                  tcpSocket:
+                    port: https
+                resources:
+                  requests:
+                    memory: 16Mi
+                    cpu: 10m
+                  limits:
+                    memory: 64Mi
+                    cpu: 100m
+                volumeMounts:
+                  - name: nginx-conf
+                    mountPath: /etc/nginx/conf.d
+                    readOnly: true
+                  - name: tls
+                    mountPath: /etc/nginx/tls
+                    readOnly: true
+                  - name: nginx-tmp
+                    mountPath: /tmp
+
+            extraVolumes:
+              - name: nginx-conf
+                configMap:
+                  name: infisical-nginx
+              - name: tls
+                secret:
+                  secretName: infisical-tls
+              - name: nginx-tmp
+                emptyDir: {}
+
+          ingress:
+            enabled: false
+            nginx:
+              enabled: false
+
+          postgresql:
+            enabled: false
+
+          redis:
+            enabled: false
+    - repoURL: https://github.com/jangroth/homekube-apps.git
+      path: applications/wave-02-apps/infisical-extras
+      targetRevision: HEAD

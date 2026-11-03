@@ -45,6 +45,13 @@
       "matchDatasources": ["docker"],
       "matchDepNames": ["nousresearch/hermes-agent", "tailscale/tailscale", "ghcr.io/betterleaks/betterleaks"],
       "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "description": "Postgres/Redis majors need a manual data migration",
+      "matchDatasources": ["docker"],
+      "matchDepNames": ["postgres", "redis"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ]
 }

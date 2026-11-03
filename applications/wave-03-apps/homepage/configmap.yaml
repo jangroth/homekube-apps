@@ -152,6 +152,11 @@ data:
             href: https://pi0.taild13083.ts.net/dex
             siteMonitor: http://dex.dex.svc:5556/dex/healthz
             description: OIDC federation (Google)
+        - Infisical:
+            icon: infisical.png
+            href: https://192.168.86.247
+            siteMonitor: https://infisical-https.infisical.svc
+            description: Secret store
     - AI:
         - Hermes:
             icon: mdi-robot-outline
