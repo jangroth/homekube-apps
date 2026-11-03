@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: infisical-tls
+  namespace: infisical
+spec:
+  secretName: infisical-tls
+  duration: 8760h
+  renewBefore: 720h
+  issuerRef:
+    name: homekube-ca
+    kind: ClusterIssuer
+  dnsNames:
+    - infisical-https.infisical.svc.cluster.local
+  ipAddresses:
+    - 192.168.86.247

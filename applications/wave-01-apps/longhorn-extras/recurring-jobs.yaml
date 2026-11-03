@@ -8,3 +8,16 @@ spec:
   task: backup
   retain: 7
   concurrency: 1
+---
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: daily-backup
+  namespace: longhorn-system
+spec:
+  cron: "0 16 * * *"
+  task: backup
+  groups:
+    - daily
+  retain: 7
+  concurrency: 1
