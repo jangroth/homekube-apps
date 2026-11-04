@@ -1,0 +1,15 @@
+# Restores the Postgres backup into a new Longhorn volume; set fromBackup to the backup URL being tested.
+apiVersion: longhorn.io/v1beta2
+kind: Volume
+metadata:
+  name: infisical-restore-pg
+  namespace: longhorn-system
+spec:
+  fromBackup: s3://homekube-backups-010316939032-ap-southeast-2-an@ap-southeast-2/longhorn?backup=infisical-pg-manual-20261104&volume=pvc-b2d30933-3dae-41f6-8a77-7d89b48237f2
+  backupTargetName: default
+  size: "5368709120"
+  numberOfReplicas: 3
+  dataEngine: v1
+  frontend: blockdev
+  accessMode: rwo
+  staleReplicaTimeout: 30

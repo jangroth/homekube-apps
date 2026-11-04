@@ -113,6 +113,56 @@ kubectl create secret generic homepage-widget-secrets \
 
 ---
 
+### Infisical (human step)
+
+Infisical ([spec 009](../docs/specs/009-infisical-phase-1.md)) needs its own bootstrap secrets, a backup before every version bump, and a manual restore procedure.
+
+**1. Bootstrap secrets.** Generate the values, store them in the password manager **before** sealing, then seal. `ENCRYPTION_KEY` encrypts every stored secret and can't be rotated, so losing it makes the data unrecoverable even when you have a backup. On a rebuild, re-seal from the password-manager values; don't generate new ones.
+
+```sh
+ENC=$(openssl rand -hex 16); AUTH=$(openssl rand -base64 32); PGPW=$(openssl rand -hex 24)
+# → store ENC, AUTH, PGPW in the password manager now
+
+cd applications/wave-02-apps/infisical-extras
+seal() { kubeseal --controller-name sealed-secrets --controller-namespace kube-system -o json; }   # zsh doesn't word-split "$VAR" commands
+
+kubectl create secret generic infisical-secrets -n infisical --dry-run=client -o json \
+  --from-literal=ENCRYPTION_KEY="$ENC" --from-literal=AUTH_SECRET="$AUTH" \
+  --from-literal=DB_CONNECTION_URI="postgresql://infisical:$PGPW@postgres.infisical.svc.cluster.local:5432/infisical" \
+  --from-literal=REDIS_URL='redis://redis.infisical.svc.cluster.local:6379' \
+| seal > infisical-sealedsecret.yaml
+
+kubectl create secret generic postgres-credentials -n infisical --dry-run=client -o json \
+  --from-literal=POSTGRES_USER=infisical --from-literal=POSTGRES_PASSWORD="$PGPW" --from-literal=POSTGRES_DB=infisical \
+| seal > postgres-sealedsecret.yaml
+
+unset ENC AUTH PGPW
+```
+
+`rolloutOnEveryRender` is off, so changing `infisical-secrets` doesn't restart the pod. After the sync, run `kubectl -n infisical rollout restart deploy/infisical`.
+
+**2. Before merging an Infisical bump.** Each release runs its DB migrations at startup, and there's no down-migration: the only way back is to restore the volume. Take a manual Longhorn backup of the `data-postgres-0` volume and wait for it to finish (Longhorn UI → Volumes → the `pvc-…` volume whose PVC is `data-postgres-0` → Create Backup), then merge. Postgres and Redis major bumps are disabled in Renovate. A Postgres major is a dump-and-restore migration.
+
+**3. Restore.** The manifests are in [`manual/infisical-restore/`](manual/infisical-restore/). They restore a backup into a new volume in the throwaway namespace `infisical-restore`, so the live namespace is untouched. The same procedure is the starting point for a real recovery.
+
+```sh
+cd manual/infisical-restore
+# 1. Set spec.fromBackup in 01-volume.yaml to the backup URL (Longhorn UI → Backup → volume → backup → URL)
+kubectl apply -f 01-volume.yaml
+kubectl -n longhorn-system get volumes.longhorn.io infisical-restore-pg -w   # wait for state "detached"
+kubectl apply -f 02-pv-pvc.yaml
+# 2. Create plain Secrets infisical-secrets and postgres-credentials in infisical-restore
+#    (the commands in step 1 without --dry-run/seal, -n infisical-restore, and hosts *.infisical-restore.svc)
+kubectl apply -f 03-workloads.yaml   # Infisical restarts until Postgres is up
+kubectl -n infisical-restore port-forward deploy/infisical 8080:8080   # http://localhost:8080
+# 3. Clean up
+kubectl delete namespace infisical-restore
+kubectl delete pv infisical-restore-pg
+kubectl -n longhorn-system delete volumes.longhorn.io infisical-restore-pg
+```
+
+---
+
 ### Renovate PAT (human step)
 
 `.github/workflows/renovate.yml` needs a `RENOVATE_TOKEN` repo secret to open PRs — not creatable by automation.
