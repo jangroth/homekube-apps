@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infisical-restore
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: infisical-restore-pg
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes: ["ReadWriteOnce"]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn-static
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeHandle: infisical-restore-pg
+  claimRef:
+    namespace: infisical-restore
+    name: data-postgres
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-postgres
+  namespace: infisical-restore
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn-static
+  volumeName: infisical-restore-pg
+  resources:
+    requests:
+      storage: 5Gi
