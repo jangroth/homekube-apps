@@ -163,6 +163,44 @@ kubectl -n longhorn-system delete volumes.longhorn.io infisical-restore-pg
 
 ---
 
+### Agent Vault proxy (human step)
+
+The Agent Vault proxy ([spec 010](../docs/specs/010-agent-vault-hermes.md)) attaches Hermes's API credentials to its outbound requests, so Hermes only holds a session token. Its proxy, services, bundle and session live in Infisical and are created in the UI. Needs Infisical `>= v0.167.2` (proxy tokens); older servers only issue enrollment tokens, which `infisical/cli >= 0.44.7` can't use.
+
+**1. Infisical UI** (`https://192.168.86.247`, default Agent Vault project; the open-source edition can't create others). Each token is shown once: store it in the password manager before closing the dialog.
+
+- **Proxy** `homekube`: Advanced Options → traffic policy **Any host**, poll interval `60`. Store the **proxy token** as "Agent Vault proxy token (homekube)".
+- **Access bundle** `hermes`, with service `tavily`:
+  - Host `api.tavily.com`, method `POST`, paths `/search`, `/extract`
+  - Bearer credential: header `Authorization`, prefix `Bearer`, value the real Tavily key
+- **Session** on bundle `hermes`, label `hermes`, expiry **Never**. Store the **session token** as "Agent Vault session token (hermes bundle)".
+
+**2. Seal both tokens.** `read -s` keeps them out of shell history (zsh syntax; bash: `read -s -p "Proxy token: " PT`).
+
+```sh
+seal() { kubeseal --controller-name sealed-secrets --controller-namespace kube-system -o json; }
+
+read -s "PT?Proxy token: "; echo
+kubectl create secret generic agent-vault-proxy-token -n agent-vault \
+  --from-literal=INFISICAL_AGENT_VAULT_PROXY_TOKEN="$PT" --dry-run=client -o json \
+| seal > applications/wave-03-apps/agent-vault/proxy-token-sealedsecret.yaml
+unset PT
+
+# The session token is the password half of Hermes's HTTPS_PROXY URL.
+read -s "ST?Session token: "; echo
+kubectl create secret generic hermes-agent-vault -n hermes \
+  --from-literal=HTTPS_PROXY="http://x-agent-vault:${ST}@agent-vault-proxy.agent-vault.svc:17323" \
+  --dry-run=client -o json \
+| seal > hermes-agent-vault-sealedsecret.json
+unset ST
+```
+
+The proxy pod doesn't start without `agent-vault-proxy-token`. Once it is Ready, the Proxies page shows `homekube` as connected, with a Certificate Authority fingerprint.
+
+On a rebuild, re-seal both from the password manager. A new proxy token re-enrolls the proxy and changes its CA, which Hermes has to trust again; a new session only needs `hermes-agent-vault` resealed and Hermes restarted.
+
+---
+
 ### Renovate PAT (human step)
 
 `.github/workflows/renovate.yml` needs a `RENOVATE_TOKEN` repo secret to open PRs — not creatable by automation.
