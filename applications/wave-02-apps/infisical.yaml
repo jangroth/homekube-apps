@@ -29,6 +29,10 @@ spec:
             replicaCount: 1
             rolloutOnEveryRender: false
             kubeSecretRef: infisical-secrets
+            # Chart releases lag server releases.
+            image:
+              # renovate: datasource=docker depName=infisical/infisical
+              tag: v0.167.6
 
             affinity:
               nodeAffinity:
