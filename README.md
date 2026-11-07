@@ -191,13 +191,27 @@ read -s "ST?Session token: "; echo
 kubectl create secret generic hermes-agent-vault -n hermes \
   --from-literal=HTTPS_PROXY="http://x-agent-vault:${ST}@agent-vault-proxy.agent-vault.svc:17323" \
   --dry-run=client -o json \
-| seal > hermes-agent-vault-sealedsecret.json
+| seal > /tmp/hermes-agent-vault.json
 unset ST
 ```
 
 The proxy pod doesn't start without `agent-vault-proxy-token`. Once it is Ready, the Proxies page shows `homekube` as connected, with a Certificate Authority fingerprint.
 
-On a rebuild, re-seal both from the password manager. A new proxy token re-enrolls the proxy and changes its CA, which Hermes has to trust again; a new session only needs `hermes-agent-vault` resealed and Hermes restarted.
+**3. Hermes values.** The herminator chart renders `hermes-agent-vault` itself, so only its ciphertext goes into git, in `applications/wave-03-apps/hermes.yaml` under `agentVault`:
+
+```sh
+jq -r .spec.encryptedData.HTTPS_PROXY /tmp/hermes-agent-vault.json   # → encryptedHttpsProxy
+rm /tmp/hermes-agent-vault.json
+
+kubectl -n agent-vault port-forward deploy/agent-vault-proxy 17323 &
+curl -s http://localhost:17323/_agent-vault/ca | jq -er .certificate > /tmp/agent-vault-ca.pem
+kill %1
+openssl x509 -in /tmp/agent-vault-ca.pem -noout -fingerprint -sha256
+```
+
+The fingerprint must match the one on the Proxies page (hover for the full value) before the PEM goes into `caCert`; keep it in the comment above `caCert`. Either value changing restarts Hermes.
+
+On a rebuild, re-seal both from the password manager. A new proxy token re-enrolls the proxy and changes its CA, so `caCert` has to be fetched again; a new session only needs `encryptedHttpsProxy` resealed.
 
 ---
 

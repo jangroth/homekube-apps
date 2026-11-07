@@ -40,3 +40,19 @@ spec:
           betterleaks:
             # renovate: datasource=docker depName=ghcr.io/betterleaks/betterleaks
             tag: v1.9.0
+        # Agent Vault proxy (spec 010); see README "Agent Vault proxy".
+        agentVault:
+          encryptedHttpsProxy: AgAAshUO3xwHMhCclH38cHyIQwAAwfrQtom8ldwZf3wrZsx9XWLGt0ZzHDcM+ZdjkgUBB8Gk8ZWmR3br+4efOEEQ8cSyZOfKArJZRruEeFmm+nHgXeli35AaGZvS+omJu21S5m8CgPWDt4CohHCTyuCwvr6FnRR1/nEg/bxfkOSic32Lb+IcuXaD9QkwiOQZFLoiB2zzIrdRWiXekdotIbu/XfvTK16rbfGWRQVLej3gx7qJkM6GXIijZpQCHGT2LAsvfnExf7Ux+f13wzD8cY1rvcDNras1a+ZVktrOXOccUopbeL2mVyMQn63rp3rFYnOOugynUQ8illwWtmVM9JmbJ2a1YfPWzEyF6G3AgXcoYMzPbJq9hdrATGFJx0tkhF53aHZp3d1YFb+Wsll1LzlCskoJK0XWAiXsqjS2MjQ52+skNVQsCUPhhcGx5JqSvKg5BR037pOjlMNl5OKLVkmL9jmN3JN6Titjvwt9AXW4gmS4AtlSqsKq3lTacCjALsqNMt+eLXkAvJomonEAX++Y8isOO5VvplAQ+Wh2KYDKC4LLHgEvNdLMISUEbUqoOHA7JgGuXrlzSViJV4q1T5YtT18CSHfYIhYxGyh+hHn/Z/zelXcC2yHdadkS3W5jEkR5naJNXCOQyn4POZjtLQ//eXcFzGNb99zlou9xsRiTWnUbsiaPwYL8sOtq5c+YJ3Lteh3IH+Qy4SRizmCp24yBhIBanGOVO8gAX4UVCR7j9Chs5tTzFL2zhGZKFfDrmIBQ8/2RsRg341CU8pomF/T/yCUzVgQTdc0Rc9kAGmlOEbVQOnJrXg5PM/fmFH9VF36t3XhKUuk1gA/oz5Q=
+          # SHA256 60:79:EB:CE:9D:7B:89:8C:B0:5F:B1:C2:0A:9D:AD:2B:81:B3:34:E4:C6:1A:5B:0B:04:77:2D:9B:A5:A1:8B:CF
+          caCert: |
+            -----BEGIN CERTIFICATE-----
+            MIIBkzCCATmgAwIBAgIUB5KODtAbkvjMP/oiLvisVSrDJ6MwCgYIKoZIzj0EAwIw
+            JjEkMCIGA1UEAxMbSW5maXNpY2FsIEFnZW50IFZhdWx0IFByb3h5MB4XDTI2MTEw
+            NzAzNTQwOVoXDTM2MTEwNzAzNTgwOVowJjEkMCIGA1UEAxMbSW5maXNpY2FsIEFn
+            ZW50IFZhdWx0IFByb3h5MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmIIW/tD3
+            dm188aVwJ2i/Ixv7sHuOkFGBcYtkkdWjSMwVePd+StnJoDjE1IGobN9swW6A+JEy
+            oJwQ+ZsaNRQGIKNFMEMwDgYDVR0PAQH/BAQDAgEGMBIGA1UdEwEB/wQIMAYBAf8C
+            AQAwHQYDVR0OBBYEFCjyqCE0WE6fDxPCJK488dHL97AuMAoGCCqGSM49BAMCA0gA
+            MEUCIFMIAx/s+y99Sh2PMszsCx03VhipqcKOPBUU8PUJ5Ra0AiEA0UgEwAuRP/9y
+            tD50mWvF+gFkNgyLQJSCIubuRj05EXw=
+            -----END CERTIFICATE-----
