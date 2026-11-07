@@ -211,7 +211,23 @@ openssl x509 -in /tmp/agent-vault-ca.pem -noout -fingerprint -sha256
 
 The fingerprint must match the one on the Proxies page (hover for the full value) before the PEM goes into `caCert`; keep it in the comment above `caCert`. Either value changing restarts Hermes.
 
+**4. Hermes's `.env`.** Brokered keys are placeholders on the PVC; Hermes treats `dummy`, `placeholder`, `changeme`, `none` and all-`x` values as unset, so use `agent-vault-<service>`:
+
+```sh
+kubectl -n hermes exec deploy/hermes -c hermes -- \
+  sed -i 's/^TAVILY_API_KEY=.*/TAVILY_API_KEY=agent-vault-tavily/' /opt/data/.env
+kubectl -n hermes rollout restart deploy/hermes
+```
+
+Check with a web search from Hermes: the proxy log (`kubectl -n agent-vault logs deploy/agent-vault-proxy`) shows `"decision":"brokered"` for service `tavily`. Passthrough requests are not logged at info.
+
 On a rebuild, re-seal both from the password manager. A new proxy token re-enrolls the proxy and changes its CA, so `caCert` has to be fetched again; a new session only needs `encryptedHttpsProxy` resealed.
+
+#### Rotation
+
+- **Brokered key** (e.g. Tavily): edit the credential on the service in bundle `hermes`. The proxy picks it up within one poll interval (60s); Hermes is untouched. If Hermes saw a 401 meanwhile it marks the key exhausted: `kubectl -n hermes exec deploy/hermes -c hermes -- su -s /bin/sh hermes -c 'hermes auth reset tavily'`.
+- **Session**, make-before-break: create a new session on bundle `hermes`, store its token, reseal (step 2, second block), set `encryptedHttpsProxy` (step 3) and merge. The checksum annotation restarts Hermes. Once a web search shows `brokered`, revoke the old session. A revoked session gets 403 on every proxied request, so revoking first cuts off all of Hermes's web access.
+- **Proxy token**: create a new token on proxy `homekube`, store it, reseal `agent-vault-proxy-token` (step 2, first block) and merge, then restart the proxy (`kubectl -n agent-vault rollout restart deploy/agent-vault-proxy`). If the CA fingerprint on the Proxies page changed, redo step 3's `caCert`. A revoked proxy token gets 503 on every request.
 
 ---
 
