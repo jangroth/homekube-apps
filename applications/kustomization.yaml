@@ -19,3 +19,4 @@ resources:
   - wave-02-apps/infisical.yaml
   - wave-03-apps/homepage.yaml
   - wave-03-apps/hermes.yaml
+  - wave-03-apps/agent-vault.yaml
