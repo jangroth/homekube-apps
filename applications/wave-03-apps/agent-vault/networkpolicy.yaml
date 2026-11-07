@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agent-vault-proxy
+  namespace: agent-vault
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: agent-vault-proxy
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: hermes
+      ports:
+        - port: 17323
+          protocol: TCP

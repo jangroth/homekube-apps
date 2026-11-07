@@ -47,6 +47,12 @@
       "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+$/"
     },
     {
+      "description": "Only plain X.Y.Z releases; skip per-arch and windows tags",
+      "matchDatasources": ["docker"],
+      "matchDepNames": ["infisical/cli"],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
       "description": "Postgres/Redis majors need a manual data migration",
       "matchDatasources": ["docker"],
       "matchDepNames": ["postgres", "redis"],
