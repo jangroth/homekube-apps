@@ -18,6 +18,13 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+  # Chart renders nodePort as null; the API server allocates one.
+  ignoreDifferences:
+    - kind: Service
+      name: coder
+      jqPathExpressions:
+        - .spec.ports[].nodePort
   sources:
     - repoURL: https://helm.coder.com/v2
       chart: coder
@@ -39,6 +46,10 @@ spec:
               - name: CODER_PROVISIONER_DAEMONS
                 value: "1"
               - name: CODER_TELEMETRY_ENABLE
+                value: "false"
+              - name: CODER_OAUTH2_GITHUB_DEFAULT_PROVIDER_ENABLE
+                value: "false"
+              - name: CODER_EXTERNAL_AUTH_GITHUB_DEFAULT_PROVIDER_ENABLE
                 value: "false"
               # Added to the system bundle file, not a replacement for it.
               - name: SSL_CERT_DIR
