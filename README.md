@@ -284,7 +284,17 @@ Dex reads `dex-coder-client` through `envFrom` and doesn't restart when it chang
    ```
 3. Log out, then **Sign in with Dex** as the daily user. Another Google account should get "Signups are disabled".
 
-**3. Before merging a Coder bump.** Coder runs DB migrations at startup and has no down-migration. Back up the `data-postgres-0` volume in namespace `coder` first (Longhorn UI → Volumes → the `pvc-…` volume whose PVC is `data-postgres-0` → Create Backup), wait for it to finish, then merge. Coder chart bumps arrive as their own Renovate PR.
+**3. Template.** [`manual/coder-templates/kubernetes/`](manual/coder-templates/kubernetes/) is Coder state, not a Kubernetes object, so ArgoCD doesn't apply it. Change it in git first, merge, then push from `main`. Never edit it in the UI. A merged Renovate bump of its image also needs this push.
+
+```sh
+cd manual/coder-templates/kubernetes
+coder templates push kubernetes --directory . --yes   # as an owner; the first push creates the template
+coder templates versions list kubernetes              # new version is active
+```
+
+Running workspaces keep their version until restarted with **Update**.
+
+**4. Before merging a Coder bump.** Coder runs DB migrations at startup and has no down-migration. Back up the `data-postgres-0` volume in namespace `coder` first (Longhorn UI → Volumes → the `pvc-…` volume whose PVC is `data-postgres-0` → Create Backup), wait for it to finish, then merge. Coder chart bumps arrive as their own Renovate PR.
 
 ---
 
