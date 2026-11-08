@@ -275,13 +275,14 @@ Dex reads `dex-coder-client` through `envFrom` and doesn't restart when it chang
 **2. Owners.** Coder emails are unique, so the break-glass owner uses a `+breakglass` alias. With OIDC signups off, the daily user is created up front, and the first Dex login links to it by email. Don't use "Convert to OIDC" in account settings: it removes the password.
 
 1. **Right after the first sync**, open `https://192.168.86.248` and create the first user with `<you>+breakglass@<domain>`. Store its password in the password manager. Until a user exists, anyone who reaches the UI can claim the owner account through any login method, whatever the signup settings say.
-2. From darth:
+2. From darth (`brew install coder`, ideally matching the server version; homekube-ca must be trusted in the macOS keychain). The email must match the Google account exactly, since the first Dex login links by email:
    ```sh
-   coder login https://192.168.86.248   # as the break-glass owner
+   coder login https://192.168.86.248   # browser opens; sign in as the break-glass owner, paste the token back
    coder users create --login-type oidc --email <you>@<domain> --username <user>
    coder users edit-roles <user> --roles owner
+   coder users list                     # both users, both owner
    ```
-3. Log out, then sign in with Dex as the daily user.
+3. Log out, then **Sign in with Dex** as the daily user. Another Google account should get "Signups are disabled".
 
 **3. Before merging a Coder bump.** Coder runs DB migrations at startup and has no down-migration. Back up the `data-postgres-0` volume in namespace `coder` first (Longhorn UI → Volumes → the `pvc-…` volume whose PVC is `data-postgres-0` → Create Backup), wait for it to finish, then merge. Coder chart bumps arrive as their own Renovate PR.
 
