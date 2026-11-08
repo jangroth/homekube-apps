@@ -274,7 +274,7 @@ Dex reads `dex-coder-client` through `envFrom` and doesn't restart when it chang
 
 **2. Owners.** Coder emails are unique, so the break-glass owner uses a `+breakglass` alias. With OIDC signups off, the daily user is created up front, and the first Dex login links to it by email. Don't use "Convert to OIDC" in account settings: it removes the password.
 
-1. Open `https://192.168.86.248` and create the first user with `<you>+breakglass@<domain>`. Store its password in the password manager.
+1. **Right after the first sync**, open `https://192.168.86.248` and create the first user with `<you>+breakglass@<domain>`. Store its password in the password manager. Until a user exists, anyone who reaches the UI can claim the owner account through any login method, whatever the signup settings say.
 2. From darth:
    ```sh
    coder login https://192.168.86.248   # as the break-glass owner

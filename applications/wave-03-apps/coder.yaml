@@ -49,11 +49,14 @@ spec:
                 value: "false"
               - name: CODER_OAUTH2_GITHUB_DEFAULT_PROVIDER_ENABLE
                 value: "false"
-              - name: CODER_EXTERNAL_AUTH_GITHUB_DEFAULT_PROVIDER_ENABLE
-                value: "false"
               # Added to the system bundle file, not a replacement for it.
               - name: SSL_CERT_DIR
                 value: /etc/homekube-ca
+
+            # As env, CODER_EXTERNAL_AUTH_GITHUB_* is parsed as a numbered provider and fails startup.
+            commandArgs:
+              - server
+              - --external-auth-github-default-provider-enable=false
 
             envFrom:
               - secretRef:
