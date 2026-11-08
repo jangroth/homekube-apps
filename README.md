@@ -233,6 +233,60 @@ On a rebuild, re-seal both from the password manager. A new proxy token re-enrol
 
 ---
 
+### Coder (human step)
+
+Coder ([spec 011](../docs/specs/011-coder-install.md)) needs bootstrap secrets, two owner accounts, its template pushed by hand, and a backup before every version bump.
+
+**1. Bootstrap secrets.** Generate, store in the password manager **before** sealing, then seal. The Dex client secret goes into two Secrets: Coder's and Dex's. On a rebuild, re-seal from the password-manager values.
+
+```sh
+PGPW=$(openssl rand -hex 24); OIDC=$(openssl rand -hex 32)
+
+echo "Coder (spec 011)
+POSTGRES_USER=coder
+POSTGRES_PASSWORD=$PGPW
+POSTGRES_DB=coder
+DEX_CLIENT_ID=coder
+DEX_CLIENT_SECRET=$OIDC
+Sealed into: coder/coder-secrets, coder/postgres-credentials, dex/dex-coder-client"
+# → paste into the password manager and save before going on; clear the terminal afterwards
+
+seal() { kubeseal --controller-name sealed-secrets --controller-namespace kube-system -o json; }
+cd applications/wave-03-apps/coder-extras
+
+kubectl create secret generic coder-secrets -n coder --dry-run=client -o json \
+  --from-literal=CODER_PG_CONNECTION_URL="postgres://coder:$PGPW@postgres.coder.svc.cluster.local:5432/coder?sslmode=disable" \
+  --from-literal=CODER_OIDC_CLIENT_SECRET="$OIDC" \
+| seal > coder-sealedsecret.yaml
+
+kubectl create secret generic postgres-credentials -n coder --dry-run=client -o json \
+  --from-literal=POSTGRES_USER=coder --from-literal=POSTGRES_PASSWORD="$PGPW" --from-literal=POSTGRES_DB=coder \
+| seal > postgres-sealedsecret.yaml
+
+kubectl create secret generic dex-coder-client -n dex --dry-run=client -o json \
+  --from-literal=CODER_CLIENT_SECRET="$OIDC" \
+| seal > ../../wave-02-apps/dex-extras/dex-coder-client.yaml
+
+unset PGPW OIDC
+```
+
+Dex reads `dex-coder-client` through `envFrom` and doesn't restart when it changes. After resealing it, run `kubectl -n dex rollout restart deploy/dex`.
+
+**2. Owners.** Coder emails are unique, so the break-glass owner uses a `+breakglass` alias. With OIDC signups off, the daily user is created up front, and the first Dex login links to it by email. Don't use "Convert to OIDC" in account settings: it removes the password.
+
+1. Open `https://192.168.86.248` and create the first user with `<you>+breakglass@<domain>`. Store its password in the password manager.
+2. From darth:
+   ```sh
+   coder login https://192.168.86.248   # as the break-glass owner
+   coder users create --login-type oidc --email <you>@<domain> --username <user>
+   coder users edit-roles <user> --roles owner
+   ```
+3. Log out, then sign in with Dex as the daily user.
+
+**3. Before merging a Coder bump.** Coder runs DB migrations at startup and has no down-migration. Back up the `data-postgres-0` volume in namespace `coder` first (Longhorn UI → Volumes → the `pvc-…` volume whose PVC is `data-postgres-0` → Create Backup), wait for it to finish, then merge. Coder chart bumps arrive as their own Renovate PR.
+
+---
+
 ### Renovate PAT (human step)
 
 `.github/workflows/renovate.yml` needs a `RENOVATE_TOKEN` repo secret to open PRs — not creatable by automation.

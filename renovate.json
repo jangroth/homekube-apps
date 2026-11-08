@@ -15,6 +15,16 @@
       "matchStrings": [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s*tag: (?<currentValue>\\S+)"
       ]
+    },
+    {
+      "customType": "regex",
+      "description": "Coder template images, marked with a renovate comment above the image line",
+      "managerFilePatterns": [
+        "/^manual/coder-templates/.+\\.tf$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[^\\n]*\"[^\":]+:(?<currentValue>[^\"]+)\""
+      ]
     }
   ],
   "argocd": {
@@ -36,6 +46,7 @@
     {
       "description": "Group minor and patch Helm chart updates to reduce PR noise",
       "matchManagers": ["argocd"],
+      "matchPackageNames": ["!coder"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "Helm chart minor/patch updates",
       "groupSlug": "helm-minor-patch"
@@ -51,6 +62,12 @@
       "matchDatasources": ["docker"],
       "matchDepNames": ["infisical/cli"],
       "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
+    },
+    {
+      "description": "example-base tags are ubuntu-YYYYMMDD; skip the floating and release-named ones",
+      "matchDatasources": ["docker"],
+      "matchDepNames": ["codercom/example-base"],
+      "versioning": "regex:^ubuntu-(?<major>\\d{8})$"
     },
     {
       "description": "Postgres/Redis majors need a manual data migration",

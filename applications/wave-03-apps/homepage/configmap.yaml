@@ -163,6 +163,11 @@ data:
             href: https://192.168.86.246
             siteMonitor: https://hermes.hermes.svc
             description: Hermes Agent (Dex login)
+        - Coder:
+            icon: coder.png
+            href: https://192.168.86.248
+            siteMonitor: https://coder.coder.svc
+            description: Workspaces (Dex login)
   bookmarks.yaml: |
     - Repos:
         - homekube:

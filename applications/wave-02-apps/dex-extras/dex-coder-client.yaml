@@ -1,0 +1,19 @@
+{
+  "kind": "SealedSecret",
+  "apiVersion": "bitnami.com/v1alpha1",
+  "metadata": {
+    "name": "dex-coder-client",
+    "namespace": "dex"
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "name": "dex-coder-client",
+        "namespace": "dex"
+      }
+    },
+    "encryptedData": {
+      "CODER_CLIENT_SECRET": "AgBmdNEivCa9n/SF4SOTvw8CrdLIPMLz9Ykua9gQcaXfwf359YnnEQN9l1YHrOEHzi5fphjXpf6lv5r9r07Zy4SwcePCuv6bI+Tgpap/0I/mnafobjiYVsis2uta9vSrKu6XavO1a8ipCqkZ8mUDkvFV5PCCe8nuS40U7ckzU+zR8qW+mCPIWVB9UDm62xiJg/X1fDZN8fyw9snVGR427oLPZ2YqTvDvFGCliJQ4Om5ozaazChn3pgLapxlJv4Iz/VY4kvPQ/7mR1255MUKa+gMlQZnVDuEEIASWmnKeAZhSfp/00EEyBtHFMhIbBZFZg4xpI/g9JkwzYeBmTdh/aYWvb8q/QOAlQn0lGoUvnBxkxPH+UBEQw7seyr8V5a6J+vGhvCXdLoWCN7dVnu2kGyClWQa7aGqCAUKwSlEr1tj6fuK31+yvV9rkTGxheAqwbnuS5xTw2NjwXsCKiwdS67RyC6HgXMyjOmrLRtwuC11ie5wYasy3hAhgdPmO9pviWUxkyY08Mwh74SCSK6l6DuzWokVCOZ4hbqlQmClohjm+onJk8ZO6YxlAgjUE/0mPfOKzpbhmBMtytwaiZhVINr/ZQyXZnwfbZa7Srd7PG+4uerDWEOlwUwJF0h1aLCaNVy8Au7R+xbs1K0iaoHjYiv8NRXTX9wipf/VC5K+fwN7Hh8Q0UQZwMJXYBRCUG8hhb64GRIatfh8FSJJ21Hh/CboL6lPnkCIKT2+eOKMJ4t7+OqS/sRPYi+8X6mOSNt+71aA3DFavRGAdQM7mSvTclXjN"
+    }
+  }
+}
