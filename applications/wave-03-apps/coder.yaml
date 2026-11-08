@@ -1,0 +1,92 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coder
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: coder
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  sources:
+    - repoURL: https://helm.coder.com/v2
+      chart: coder
+      targetRevision: 2.39.0
+      helm:
+        values: |
+          coder:
+            env:
+              - name: CODER_ACCESS_URL
+                value: https://192.168.86.248
+              - name: CODER_OIDC_ISSUER_URL
+                value: https://pi0.taild13083.ts.net/dex
+              - name: CODER_OIDC_CLIENT_ID
+                value: coder
+              - name: CODER_OIDC_ALLOW_SIGNUPS
+                value: "false"
+              - name: CODER_OIDC_SIGN_IN_TEXT
+                value: Sign in with Dex
+              - name: CODER_PROVISIONER_DAEMONS
+                value: "1"
+              - name: CODER_TELEMETRY_ENABLE
+                value: "false"
+              # Added to the system bundle file, not a replacement for it.
+              - name: SSL_CERT_DIR
+                value: /etc/homekube-ca
+
+            envFrom:
+              - secretRef:
+                  name: coder-secrets
+
+            tls:
+              secretNames:
+                - coder-tls
+
+            service:
+              annotations:
+                io.cilium/lb-ipam-ips: "192.168.86.248"
+
+            serviceAccount:
+              workspacePerms: false
+              workspaceNamespaces:
+                - name: coder-workspaces
+                  workspacePerms: true
+                  enableDeployments: false
+
+            volumes:
+              - name: homekube-ca
+                configMap:
+                  name: homekube-ca
+            volumeMounts:
+              - name: homekube-ca
+                mountPath: /etc/homekube-ca
+                readOnly: true
+
+            resources:
+              requests:
+                memory: 256Mi
+                cpu: 100m
+              limits:
+                memory: 1Gi
+                cpu: 1000m
+
+            affinity:
+              nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  nodeSelectorTerms:
+                    - matchExpressions:
+                        - key: node-role.kubernetes.io/control-plane
+                          operator: DoesNotExist
+    - repoURL: https://github.com/jangroth/homekube-apps.git
+      path: applications/wave-03-apps/coder-extras
+      targetRevision: HEAD

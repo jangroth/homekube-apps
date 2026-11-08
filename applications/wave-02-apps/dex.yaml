@@ -65,6 +65,8 @@ spec:
           envFrom:
             - secretRef:
                 name: dex-google-oauth
+            - secretRef:
+                name: dex-coder-client
 
           config:
             issuer: https://pi0.taild13083.ts.net/dex
@@ -110,6 +112,11 @@ spec:
                 public: true
                 redirectURIs:
                   - https://192.168.86.246/auth/callback
+              - id: coder
+                name: Coder
+                secretEnv: CODER_CLIENT_SECRET
+                redirectURIs:
+                  - https://192.168.86.248/api/v2/users/oidc/callback
 
             expiry:
               signingKeys: 6h
