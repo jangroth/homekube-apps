@@ -137,6 +137,7 @@ resource "kubernetes_pod_v1" "main" {
       command = ["sh", "-c", "cat /etc/ssl/certs/ca-certificates.crt /etc/homekube-ca/homekube-ca.crt > ${local.ca_bundle}"]
       security_context {
         allow_privilege_escalation = false
+        run_as_non_root            = true
       }
       resources {
         requests = {
@@ -164,8 +165,10 @@ resource "kubernetes_pod_v1" "main" {
       image   = local.image
       command = ["sh", "-c", coder_agent.main.init_script]
 
+      # Container-level default (false) would override the pod's run_as_non_root.
       security_context {
         allow_privilege_escalation = false
+        run_as_non_root            = true
       }
 
       env {
@@ -183,8 +186,8 @@ resource "kubernetes_pod_v1" "main" {
 
       resources {
         requests = {
-          cpu    = "250m"
-          memory = "256Mi"
+          cpu    = "100m"
+          memory = "128Mi"
         }
         limits = {
           cpu    = "1"
