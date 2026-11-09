@@ -188,55 +188,73 @@ data:
             - icon: github.png
               href: https://github.com/jangroth/herminator-state
     # Grafana Explore deep links, last 1h; datasource uid pinned in kube-prometheus.yaml.
+    # Empty description suppresses homepage's hostname fallback.
     - Logs:
-        - ArgoCD:
-            - icon: argo-cd.png
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22argocd%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - Longhorn:
-            - icon: longhorn.png
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22longhorn-system%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - Grafana:
-            - icon: grafana.png
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22grafana%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - Prometheus:
-            - icon: prometheus.png
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22prometheus%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - Alertmanager:
-            - icon: alertmanager.png
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22alertmanager%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - Dex:
-            - icon: https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22dex%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - Infisical:
-            - icon: infisical.png
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22infisical%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - Hermes:
-            - icon: mdi-robot-outline
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22hermes%5C%22%2C%20container%3D%5C%22hermes%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - Coder:
-            - icon: coder.png
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D~%5C%22coder%7Ccoder-workspaces%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
         - Agent Vault:
             - icon: mdi-shield-key-outline
               href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22agent-vault%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - Loki:
-            - icon: loki.png
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22loki%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Alertmanager:
+            - icon: alertmanager.png
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22alertmanager%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
         - Alloy:
             - icon: mdi-pipe
               href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22alloy%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - ArgoCD:
+            - icon: argo-cd.png
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22argocd%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
         - cert-manager:
             - icon: mdi-certificate-outline
               href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22cert-manager%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
         - Cilium:
             - icon: cilium.png
               href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22kube-system%5C%22%2C%20container%3D~%5C%22cilium-.%2A%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - CoreDNS:
-            - icon: mdi-dns
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22kube-system%5C%22%2C%20container%3D%5C%22coredns%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
-        - sealed-secrets:
-            - icon: mdi-lock-outline
-              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22kube-system%5C%22%2C%20pod%3D~%5C%22sealed-secrets-.%2A%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Coder:
+            - icon: coder.png
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D~%5C%22coder%7Ccoder-workspaces%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
         - Control plane:
             - icon: kubernetes.png
               href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22kube-system%5C%22%2C%20container%3D~%5C%22kube-apiserver%7Cetcd%7Ckube-scheduler%7Ckube-controller-manager%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - CoreDNS:
+            - icon: mdi-dns
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22kube-system%5C%22%2C%20container%3D%5C%22coredns%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Dex:
+            - icon: https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22dex%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Grafana:
+            - icon: grafana.png
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22grafana%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Hermes:
+            - icon: mdi-robot-outline
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22hermes%5C%22%2C%20container%3D%5C%22hermes%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Infisical:
+            - icon: infisical.png
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22infisical%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Loki:
+            - icon: loki.png
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22loki%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Longhorn:
+            - icon: longhorn.png
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22longhorn-system%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Prometheus:
+            - icon: prometheus.png
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22prometheus%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - sealed-secrets:
+            - icon: mdi-lock-outline
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22kube-system%5C%22%2C%20pod%3D~%5C%22sealed-secrets-.%2A%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
