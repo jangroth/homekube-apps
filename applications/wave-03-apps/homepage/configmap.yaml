@@ -6,13 +6,25 @@ metadata:
   name: homepage
   namespace: homepage
 data:
-  # docker.yaml / custom.css / custom.js are unused but must exist: /app/config
+  # docker.yaml / proxmox.yaml / custom.js are unused but must exist: /app/config
   # is a read-only configMap mount, and homepage crashes trying to skeleton-copy
   # any missing config file into it (EROFS).
   docker.yaml: ""
   proxmox.yaml: ""
-  custom.css: ""
   custom.js: ""
+  # Positional selectors: #layout-groups children follow settings.yaml layout order.
+  custom.css: |
+    #layout-groups > :nth-child(1) {
+      max-width: 28rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #layout-groups > :nth-child(2),
+    #layout-groups > :nth-child(4) {
+      border-top: 1px solid rgb(255 255 255 / 0.15);
+      margin-top: 1rem;
+      padding-top: 1rem;
+    }
   settings.yaml: |
     title: homekube
     headerStyle: clean
@@ -34,16 +46,17 @@ data:
     layout:
       Health:
         style: row
-        columns: 4
-      GitOps:
-      Storage:
-      Observability:
-      Identity:
-      AI:
-      Repos:
+        columns: 1
+      Apps:
+        header: false
+        style: row
+        columns: 5
       Logs:
         style: row
         columns: 6
+      Repos:
+        style: row
+        columns: 5
     # Info widgets (longhorn) read their backend from providers, not widgets.yaml.
     providers:
       longhorn:
@@ -113,63 +126,64 @@ data:
                   query: 'sum(kube_pod_status_phase{phase=~"Pending|Failed|Unknown"}) or vector(0)'
                   format:
                     type: number
-    - GitOps:
-        - ArgoCD:
-            icon: argo-cd.png
-            href: https://192.168.86.241
-            siteMonitor: https://argocd-server.argocd.svc
-            description: GitOps controller
-            widget:
-              type: argocd
-              url: https://argocd-server.argocd.svc
-              key: "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}"
-    - Storage:
-        - Longhorn:
-            icon: longhorn.png
-            href: http://192.168.86.242
-            siteMonitor: http://longhorn-frontend.longhorn-system.svc
-            description: Distributed block storage
-    - Observability:
-        - Grafana:
-            icon: grafana.png
-            href: https://192.168.86.243
-            siteMonitor: https://prometheus-grafana.observability.svc
-            description: Dashboards
-        - Prometheus:
-            icon: prometheus.png
-            href: http://pi0:30002
-            siteMonitor: http://prometheus-kube-prometheus-prometheus.observability.svc:9090/-/healthy
-            description: Metrics
-            widget:
-              type: prometheus
-              url: http://prometheus-kube-prometheus-prometheus.observability.svc:9090
-        - Alertmanager:
-            icon: alertmanager.png
-            href: http://pi0:30004
-            siteMonitor: http://prometheus-kube-prometheus-alertmanager.observability.svc:9093/-/healthy
-            description: Alert routing
-    - Identity:
-        - Dex:
-            icon: https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png
-            href: https://pi0.taild13083.ts.net/dex
-            siteMonitor: http://dex.dex.svc:5556/dex/healthz
-            description: OIDC federation (Google)
-        - Infisical:
-            icon: infisical.png
-            href: https://192.168.86.247
-            siteMonitor: https://infisical-https.infisical.svc
-            description: Secret store
-    - AI:
-        - Hermes:
-            icon: mdi-robot-outline
-            href: https://192.168.86.246
-            siteMonitor: https://hermes.hermes.svc
-            description: Hermes Agent (Dex login)
-        - Coder:
-            icon: coder.png
-            href: https://192.168.86.248
-            siteMonitor: https://coder.coder.svc
-            description: Workspaces (Dex login)
+    - Apps:
+        - GitOps:
+            - ArgoCD:
+                icon: argo-cd.png
+                href: https://192.168.86.241
+                siteMonitor: https://argocd-server.argocd.svc
+                description: GitOps controller
+                widget:
+                  type: argocd
+                  url: https://argocd-server.argocd.svc
+                  key: "{{HOMEPAGE_VAR_ARGOCD_TOKEN}}"
+        - Storage:
+            - Longhorn:
+                icon: longhorn.png
+                href: http://192.168.86.242
+                siteMonitor: http://longhorn-frontend.longhorn-system.svc
+                description: Distributed block storage
+        - Observability:
+            - Grafana:
+                icon: grafana.png
+                href: https://192.168.86.243
+                siteMonitor: https://prometheus-grafana.observability.svc
+                description: Dashboards
+            - Prometheus:
+                icon: prometheus.png
+                href: http://pi0:30002
+                siteMonitor: http://prometheus-kube-prometheus-prometheus.observability.svc:9090/-/healthy
+                description: Metrics
+                widget:
+                  type: prometheus
+                  url: http://prometheus-kube-prometheus-prometheus.observability.svc:9090
+            - Alertmanager:
+                icon: alertmanager.png
+                href: http://pi0:30004
+                siteMonitor: http://prometheus-kube-prometheus-alertmanager.observability.svc:9093/-/healthy
+                description: Alert routing
+        - Identity:
+            - Dex:
+                icon: https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png
+                href: https://pi0.taild13083.ts.net/dex
+                siteMonitor: http://dex.dex.svc:5556/dex/healthz
+                description: OIDC federation (Google)
+            - Infisical:
+                icon: infisical.png
+                href: https://192.168.86.247
+                siteMonitor: https://infisical-https.infisical.svc
+                description: Secret store
+        - AI:
+            - Hermes:
+                icon: mdi-robot-outline
+                href: https://192.168.86.246
+                siteMonitor: https://hermes.hermes.svc
+                description: Hermes Agent (Dex login)
+            - Coder:
+                icon: coder.png
+                href: https://192.168.86.248
+                siteMonitor: https://coder.coder.svc
+                description: Workspaces (Dex login)
   bookmarks.yaml: |
     - Repos:
         - homekube:
