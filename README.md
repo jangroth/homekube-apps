@@ -292,7 +292,22 @@ coder templates push kubernetes --directory . --yes   # as an owner; the first p
 coder templates versions list kubernetes              # new version is active
 ```
 
-Running workspaces keep their version until restarted with **Update**.
+Existing workspaces keep their version until updated: `coder update <owner>/<workspace>` or **Update** in the UI. The home volume survives the update.
+
+For daily use, log the CLI in as the daily user (`coder login`, then **Sign in with Dex**). `coder ssh <name>` only finds the logged-in user's workspaces; as another owner, use `<owner>/<name>`.
+
+Smoke test after a template change:
+
+```sh
+coder create ws1 --template kubernetes --yes
+coder ssh ws1 -- 'echo hello > ~/persist.txt'
+coder stop ws1 --yes && coder start ws1 --yes
+coder ssh ws1 -- cat ~/persist.txt                  # hello
+coder delete ws1 --yes
+kubectl -n coder-workspaces get pod,pvc             # nothing left
+```
+
+Every build, stop and delete included, runs `terraform init`, which fetches provider checksums from registry.terraform.io and github.com. A failure in "Initializing Terraform Directory" with a 5xx from GitHub is upstream: retry the build.
 
 **4. Before merging a Coder bump.** Coder runs DB migrations at startup and has no down-migration. Back up the `data-postgres-0` volume in namespace `coder` first (Longhorn UI → Volumes → the `pvc-…` volume whose PVC is `data-postgres-0` → Create Backup), wait for it to finish, then merge. Coder chart bumps arrive as their own Renovate PR.
 
