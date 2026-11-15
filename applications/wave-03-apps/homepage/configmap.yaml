@@ -187,19 +187,22 @@ data:
   bookmarks.yaml: |
     - Repos:
         - homekube:
-            - icon: github.png
+            - icon: mdi-github
               href: https://github.com/jangroth/homekube
         - homekube-apps:
-            - icon: github.png
+            - icon: mdi-github
               href: https://github.com/jangroth/homekube-apps
+        - homekube-bakery:
+            - icon: mdi-github
+              href: https://github.com/jangroth/homekube-bakery
         - homekube-main:
-            - icon: github.png
+            - icon: mdi-github
               href: https://github.com/jangroth/homekube-main
         - herminator:
-            - icon: github.png
+            - icon: mdi-github
               href: https://github.com/jangroth/herminator
         - herminator-state:
-            - icon: github.png
+            - icon: mdi-github
               href: https://github.com/jangroth/herminator-state
     # Grafana Explore deep links, last 1h; datasource uid pinned in kube-prometheus.yaml.
     # Empty description suppresses homepage's hostname fallback.
