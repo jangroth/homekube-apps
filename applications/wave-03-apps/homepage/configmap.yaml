@@ -64,9 +64,6 @@ data:
   kubernetes.yaml: |
     mode: cluster
   widgets.yaml: |
-    - search:
-        provider: duckduckgo
-        target: _blank
     - kubernetes:
         cluster:
           show: true
