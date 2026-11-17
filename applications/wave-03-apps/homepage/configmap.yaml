@@ -51,6 +51,9 @@ data:
         header: false
         style: row
         columns: 5
+      Metrics:
+        style: row
+        columns: 6
       Logs:
         style: row
         columns: 6
@@ -183,6 +186,9 @@ data:
                 description: Workspaces (Dex login)
   bookmarks.yaml: |
     - Repos:
+        - ai-gateway:
+            - icon: mdi-github
+              href: https://github.com/jangroth/ai-gateway
         - homekube:
             - icon: mdi-github
               href: https://github.com/jangroth/homekube
@@ -201,6 +207,76 @@ data:
         - herminator-state:
             - icon: mdi-github
               href: https://github.com/jangroth/herminator-state
+    # Grafana dashboard deep links, last 1h; UIDs from kube-prometheus-stack defaults and grafana.com 13032.
+    - Metrics:
+        - Agent Vault:
+            - icon: mdi-shield-key-outline
+              href: https://192.168.86.243/d/a87fb0d919ec0ea5f6543124e16c42a5?orgId=1&from=now-1h&to=now&var-namespace=agent-vault
+              description: ""
+        - Alertmanager:
+            - icon: alertmanager.png
+              href: https://192.168.86.243/d/alertmanager-overview?orgId=1&from=now-1h&to=now
+              description: ""
+        - Alloy:
+            - icon: mdi-pipe
+              href: https://192.168.86.243/d/a164a7f0339f99e89cea5cb47e9be617?orgId=1&from=now-1h&to=now&var-namespace=observability&var-type=daemonset&var-workload=alloy
+              description: ""
+        - ArgoCD:
+            - icon: argo-cd.png
+              href: https://192.168.86.243/d/a87fb0d919ec0ea5f6543124e16c42a5?orgId=1&from=now-1h&to=now&var-namespace=argocd
+              description: ""
+        - cert-manager:
+            - icon: mdi-certificate-outline
+              href: https://192.168.86.243/d/a87fb0d919ec0ea5f6543124e16c42a5?orgId=1&from=now-1h&to=now&var-namespace=cert-manager
+              description: ""
+        - Cilium:
+            - icon: cilium.png
+              href: https://192.168.86.243/d/a164a7f0339f99e89cea5cb47e9be617?orgId=1&from=now-1h&to=now&var-namespace=kube-system&var-type=daemonset&var-workload=cilium
+              description: ""
+        - Coder:
+            - icon: coder.png
+              href: https://192.168.86.243/d/a87fb0d919ec0ea5f6543124e16c42a5?orgId=1&from=now-1h&to=now&var-namespace=coder
+              description: ""
+        - Control plane:
+            - icon: kubernetes.png
+              href: https://192.168.86.243/d/09ec8aa1e996d6ffcd6817bbaff4db1b?orgId=1&from=now-1h&to=now
+              description: ""
+        - CoreDNS:
+            - icon: mdi-dns
+              href: https://192.168.86.243/d/vkQ0UHxik?orgId=1&from=now-1h&to=now
+              description: ""
+        - Dex:
+            - icon: https://raw.githubusercontent.com/dexidp/dex/master/docs/logos/dex-glyph-color.png
+              href: https://192.168.86.243/d/a87fb0d919ec0ea5f6543124e16c42a5?orgId=1&from=now-1h&to=now&var-namespace=dex
+              description: ""
+        - Grafana:
+            - icon: grafana.png
+              href: https://192.168.86.243/d/6be0s85Mk?orgId=1&from=now-1h&to=now
+              description: ""
+        - Hermes:
+            - icon: mdi-robot-outline
+              href: https://192.168.86.243/d/a87fb0d919ec0ea5f6543124e16c42a5?orgId=1&from=now-1h&to=now&var-namespace=hermes
+              description: ""
+        - Infisical:
+            - icon: infisical.png
+              href: https://192.168.86.243/d/a87fb0d919ec0ea5f6543124e16c42a5?orgId=1&from=now-1h&to=now&var-namespace=infisical
+              description: ""
+        - Loki:
+            - icon: loki.png
+              href: https://192.168.86.243/d/a164a7f0339f99e89cea5cb47e9be617?orgId=1&from=now-1h&to=now&var-namespace=observability&var-type=statefulset&var-workload=loki
+              description: ""
+        - Longhorn:
+            - icon: longhorn.png
+              href: https://192.168.86.243/d/2BCgsldGz?orgId=1&from=now-1h&to=now
+              description: ""
+        - Prometheus:
+            - icon: prometheus.png
+              href: https://192.168.86.243/d/9fa0d141-d019-4ad7-8bc5-42196ee308bd?orgId=1&from=now-1h&to=now
+              description: ""
+        - sealed-secrets:
+            - icon: mdi-lock-outline
+              href: https://192.168.86.243/d/a164a7f0339f99e89cea5cb47e9be617?orgId=1&from=now-1h&to=now&var-namespace=kube-system&var-type=deployment&var-workload=sealed-secrets
+              description: ""
     # Grafana Explore deep links, last 1h; datasource uid pinned in kube-prometheus.yaml.
     # Empty description suppresses homepage's hostname fallback.
     - Logs:
