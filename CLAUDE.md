@@ -29,7 +29,13 @@ Wave is set via annotation: `argocd.argoproj.io/sync-wave: "N"`
 
 1. Create `applications/wave-NN-<wave>/<app-name>.yaml` — ArgoCD Application manifest
 2. Add it to `applications/kustomization.yaml`
-3. Commit and push — ArgoCD picks it up automatically
+3. Open a PR — ArgoCD picks it up once merged
+
+---
+
+## Branching
+
+Never commit to `main`: ArgoCD syncs it on push, so `main` is the live cluster. Every change, one-line bumps included, goes on a branch and through a PR, rebased onto `main` and merged with a merge commit (never squash).
 
 ---
 
