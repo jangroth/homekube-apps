@@ -35,7 +35,7 @@ Wave is set via annotation: `argocd.argoproj.io/sync-wave: "N"`
 
 ## Branching
 
-Never commit to `main`: ArgoCD syncs it on push, so `main` is the live cluster. Every change, one-line bumps included, goes on a branch and through a PR, rebased onto `main` and merged with a merge commit (never squash).
+ArgoCD syncs `main` on push, so `main` is the live cluster: every change, one-line bumps included, takes a PR.
 
 ---
 
