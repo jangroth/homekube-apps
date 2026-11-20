@@ -186,9 +186,18 @@ data:
                 description: Workspaces (Dex login)
   bookmarks.yaml: |
     - Repos:
+        - agentic-ai:
+            - icon: mdi-github
+              href: https://github.com/jangroth/agentic-ai
         - ai-gateway:
             - icon: mdi-github
               href: https://github.com/jangroth/ai-gateway
+        - herminator:
+            - icon: mdi-github
+              href: https://github.com/jangroth/herminator
+        - herminator-state:
+            - icon: mdi-github
+              href: https://github.com/jangroth/herminator-state
         - homekube:
             - icon: mdi-github
               href: https://github.com/jangroth/homekube
@@ -201,12 +210,6 @@ data:
         - homekube-main:
             - icon: mdi-github
               href: https://github.com/jangroth/homekube-main
-        - herminator:
-            - icon: mdi-github
-              href: https://github.com/jangroth/herminator
-        - herminator-state:
-            - icon: mdi-github
-              href: https://github.com/jangroth/herminator-state
     # Grafana dashboard deep links, last 1h; UIDs from kube-prometheus-stack defaults and grafana.com 13032.
     - Metrics:
         - Agent Vault:
