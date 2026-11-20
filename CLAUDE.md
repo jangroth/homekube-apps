@@ -6,22 +6,24 @@ See parent `CLAUDE.md` (one level up) for cluster topology and working conventio
 
 ---
 
-## Pattern
+## Branching
 
-ArgoCD runs on the cluster and watches this repo. A single root application (`applications/kustomization.yaml`) deploys all other applications. Apps are synced in waves to manage dependency order.
+ArgoCD syncs `main` on push, so `main` is the live cluster: every change, one-line bumps included, takes a PR.
 
 ---
 
-## Wave Structure
+## Waves
 
-| Wave | Sync Order | Apps |
-|------|-----------|------|
-| `wave-00-init` | First | Cilium LB (pool + L2 policy), Longhorn, metrics-server, ArgoCD config, sealed-secrets, cert-manager (+ config), CoreDNS patch, kubelet-csr-approver |
-| `wave-01-apps` | After init | Longhorn extras, kube-prometheus, Loki, Alloy, Prometheus extras (Alertmanager Telegram) |
-| `wave-02-apps` | After apps | Dex (OIDC), Infisical (secret store) |
-| `wave-03-apps` | Last | Homepage dashboard, Hermes, Agent Vault proxy, Coder |
+The root application (`applications/kustomization.yaml`) deploys every manifest it lists, synced in waves by the `argocd.argoproj.io/sync-wave: "N"` annotation. An app goes in a later wave than everything it depends on:
 
-Wave is set via annotation: `argocd.argoproj.io/sync-wave: "N"`
+| Wave | Holds |
+|------|-------|
+| `wave-00-init` | Cluster foundations: load balancer, storage, certificates, secrets, DNS, ArgoCD itself |
+| `wave-01-apps` | Observability and storage extras |
+| `wave-02-apps` | Identity (Dex) and secret store (Infisical) |
+| `wave-03-apps` | User-facing apps (Homepage, Hermes, Agent Vault proxy, Coder) |
+
+`manual/` holds one-off manifests for testing and debugging; ArgoCD doesn't manage it.
 
 ---
 
@@ -29,30 +31,9 @@ Wave is set via annotation: `argocd.argoproj.io/sync-wave: "N"`
 
 1. Create `applications/wave-NN-<wave>/<app-name>.yaml` — ArgoCD Application manifest
 2. Add it to `applications/kustomization.yaml`
-3. Open a PR — ArgoCD picks it up once merged
-
----
-
-## Branching
-
-ArgoCD syncs `main` on push, so `main` is the live cluster: every change, one-line bumps included, takes a PR.
-
----
-
-## Key Files
-
-| Path | Purpose |
-|------|---------|
-| `applications/kustomization.yaml` | Root kustomization — lists all app manifests |
-| `applications/wave-00-init/` | Foundation apps (load balancer, storage, metrics) |
-| `applications/wave-01-apps/` | Observability and storage extras |
-| `applications/wave-02-apps/` | OIDC (Dex), secret store (Infisical) |
-| `applications/wave-03-apps/` | Dashboard (Homepage), Hermes, Agent Vault proxy, Coder |
-| `manual/` | One-off manifests for testing/debugging (not managed by ArgoCD) |
 
 ---
 
 ## ArgoCD Access
 
-After cluster setup: ArgoCD is exposed as LoadBalancer (VIP from Cilium LB-IPAM pool).
-`kubectl -n argocd get svc cst-argocd-server` to see the assigned IP.
+ArgoCD is a LoadBalancer service with a VIP from the Cilium LB-IPAM pool: `kubectl -n argocd get svc cst-argocd-server` shows the IP.
