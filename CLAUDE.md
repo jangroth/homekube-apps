@@ -4,7 +4,7 @@ ArgoCD applications for the homekube cluster, using the App-of-Apps pattern.
 
 See parent `CLAUDE.md` (one level up) for cluster topology and working conventions.
 
-**Agent skills**: use a Matt Pocock skill whenever one covers the task. Its tracker, labels and domain docs (glossary, ADRs) are set in the parent `CLAUDE.md` → `## Agent skills`; in a standalone clone, read it with `gh api repos/jangroth/homekube/contents/CLAUDE.md -H 'Accept: application/vnd.github.raw'`.
+**Domain docs**: the tracker, labels, `GLOSSARY.md` and ADRs (`docs/adr/`) live in the parent repo; respect the ADRs. In a standalone clone, read them with `gh api repos/jangroth/homekube/contents/<path> -H 'Accept: application/vnd.github.raw'`.
 
 ---
 
