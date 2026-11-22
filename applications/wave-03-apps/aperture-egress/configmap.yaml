@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aperture-egress-nginx
+  namespace: aperture-egress
+  labels:
+    app.kubernetes.io/name: aperture-egress
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      server_tokens off;
+
+      location / {
+        # Aperture's tailnet IP: MagicDNS doesn't resolve in-pod.
+        proxy_pass http://100.126.29.31;
+        proxy_set_header Host ai.taild13083.ts.net;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+
+        # Streamed completions (SSE) must reach the client as they arrive.
+        proxy_buffering off;
+        proxy_request_buffering off;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+        client_max_body_size 32m;
+      }
+    }

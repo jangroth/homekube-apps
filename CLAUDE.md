@@ -23,7 +23,7 @@ The root application (`applications/kustomization.yaml`) deploys every manifest 
 | `wave-00-init` | Cluster foundations: load balancer, storage, certificates, secrets, DNS, ArgoCD itself |
 | `wave-01-apps` | Observability and storage extras |
 | `wave-02-apps` | Identity (Dex) and secret store (Infisical) |
-| `wave-03-apps` | User-facing apps (Homepage, Hermes, Agent Vault proxy, Coder) |
+| `wave-03-apps` | User-facing apps (Homepage, Hermes, Agent Vault proxy, Aperture egress, Coder) |
 
 `manual/` holds one-off manifests for testing and debugging; ArgoCD doesn't manage it.
 

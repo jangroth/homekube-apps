@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aperture-egress
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aperture-egress
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  # tailscaled writes its node state into this Secret at runtime.
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: aperture-egress-tailscale-state
+      jsonPointers:
+        - /data
+  # Plain manifests, no chart (ADR-0020).
+  source:
+    repoURL: https://github.com/jangroth/homekube-apps.git
+    path: applications/wave-03-apps/aperture-egress
+    targetRevision: HEAD
