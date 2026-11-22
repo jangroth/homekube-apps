@@ -377,6 +377,30 @@ curl -fsS -H "Authorization: Bearer $TOKEN" https://api.github.com/installation/
 
 ---
 
+### Aperture egress Tailscale key (human step)
+
+Workspaces reach Aperture through one shared egress pod (ADR-0020), the only tailnet device on their behalf, tagged `tag:coder-workspaces`. The tag and its tests live in the tailnet policy file in the private `ai-gateway` repo.
+
+**1. Auth key.** Tailscale admin console → Settings → Keys → Generate auth key: description `homekube coder-workspaces egress`, **reusable**, **not ephemeral** (the device must survive pod restarts), pre-approved, tag `tag:coder-workspaces`, 90-day expiry. Store it in the password manager as "Tailscale auth key (coder-workspaces egress)".
+
+**2. Seal** (in a terminal; `read -s` needs a tty):
+
+```sh
+seal() { kubeseal --controller-name sealed-secrets --controller-namespace kube-system -o json; }
+
+read -s "TK?Tailscale auth key: "; echo
+kubectl create secret generic aperture-egress-tailscale -n aperture-egress \
+  --from-literal=TS_AUTHKEY="$TK" --dry-run=client -o json \
+| seal > applications/wave-03-apps/aperture-egress/tailscale-authkey-sealedsecret.yaml
+unset TK
+```
+
+#### Rotation
+
+The key is only used for the first join: the pod keeps its tailnet identity in its state Secret, and tagged devices don't expire. An expired key therefore matters only when that state is lost (rebuild, deleted Secret). Then generate a new key as in step 1, reseal, merge, and restart the egress.
+
+---
+
 ### Renovate PAT (human step)
 
 `.github/workflows/renovate.yml` needs a `RENOVATE_TOKEN` repo secret to open PRs — not creatable by automation.
