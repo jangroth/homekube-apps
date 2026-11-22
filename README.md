@@ -4,7 +4,7 @@ ArgoCD applications for the [homekube](https://github.com/jangroth/homekube) clu
 
 ArgoCD watches this repo. A single root application (`applications/kustomization.yaml`) deploys everything below. Wave annotations control deployment order.
 
-See [spec 005](../docs/specs/005-production-cluster-setup.md) for full capability descriptions, version policy, and acceptance criteria.
+See [spec 005](https://github.com/jangroth/homekube/blob/main/docs/archive/specs/005-production-cluster-setup.md) for full capability descriptions, version policy, and acceptance criteria.
 
 ---
 
@@ -86,7 +86,7 @@ kubectl create secret generic alertmanager-telegram \
 
 ### Homepage widget credentials (human step)
 
-The Homepage dashboard ([spec 007](../docs/specs/007-homepage-dashboard.md)) authenticates its ArgoCD widget with an API token. The token cannot be pre-generated in source — it is minted imperatively and committed as a sealed secret. On a cluster rebuild, re-mint and re-seal (same recovery story as the other sealed secrets on this page).
+The Homepage dashboard ([spec 007](https://github.com/jangroth/homekube/blob/main/docs/archive/specs/007-homepage-dashboard.md)) authenticates its ArgoCD widget with an API token. The token cannot be pre-generated in source — it is minted imperatively and committed as a sealed secret. On a cluster rebuild, re-mint and re-seal (same recovery story as the other sealed secrets on this page).
 
 > Grafana gets a **link only, no widget**: Homepage's Grafana widget unconditionally calls `/api/admin/stats`, which requires Grafana server-admin credentials — unacceptable in the pod env of an unauthenticated dashboard. See spec 007, Open Question 2.
 
@@ -115,7 +115,7 @@ kubectl create secret generic homepage-widget-secrets \
 
 ### Infisical (human step)
 
-Infisical ([spec 009](../docs/specs/009-infisical-phase-1.md)) needs its own bootstrap secrets, a backup before every version bump, and a manual restore procedure.
+Infisical ([spec 009](https://github.com/jangroth/homekube/blob/main/docs/archive/specs/009-infisical-phase-1.md)) needs its own bootstrap secrets, a backup before every version bump, and a manual restore procedure.
 
 **1. Bootstrap secrets.** Generate the values, store them in the password manager **before** sealing, then seal. `ENCRYPTION_KEY` encrypts every stored secret and can't be rotated, so losing it makes the data unrecoverable even when you have a backup. On a rebuild, re-seal from the password-manager values; don't generate new ones.
 
@@ -165,7 +165,7 @@ kubectl -n longhorn-system delete volumes.longhorn.io infisical-restore-pg
 
 ### Agent Vault proxy (human step)
 
-The Agent Vault proxy ([spec 010](../docs/specs/010-agent-vault-hermes.md)) attaches Hermes's API credentials to its outbound requests, so Hermes only holds a session token. Its proxy, services, bundle and session live in Infisical and are created in the UI. Needs Infisical `>= v0.167.2` (proxy tokens); older servers only issue enrollment tokens, which `infisical/cli >= 0.44.7` can't use.
+The Agent Vault proxy ([spec 010](https://github.com/jangroth/homekube/blob/main/docs/archive/specs/010-agent-vault-hermes.md)) attaches Hermes's API credentials to its outbound requests, so Hermes only holds a session token. Its proxy, services, bundle and session live in Infisical and are created in the UI. Needs Infisical `>= v0.167.2` (proxy tokens); older servers only issue enrollment tokens, which `infisical/cli >= 0.44.7` can't use.
 
 **1. Infisical UI** (`https://192.168.86.247`, default Agent Vault project; the open-source edition can't create others). Each token is shown once: store it in the password manager before closing the dialog.
 
@@ -235,7 +235,7 @@ On a rebuild, re-seal both from the password manager. A new proxy token re-enrol
 
 ### Coder (human step)
 
-Coder ([spec 011](../docs/specs/011-coder-install.md)) needs bootstrap secrets, two owner accounts, its template pushed by hand, and a backup before every version bump.
+Coder ([spec 011](https://github.com/jangroth/homekube/blob/main/docs/archive/specs/011-coder-install.md)) needs bootstrap secrets, two owner accounts, its template pushed by hand, and a backup before every version bump.
 
 **1. Bootstrap secrets.** Generate, store in the password manager **before** sealing, then seal. The Dex client secret goes into two Secrets: Coder's and Dex's. On a rebuild, re-seal from the password-manager values.
 
