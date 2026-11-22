@@ -313,6 +313,70 @@ Every build, stop and delete included, runs `terraform init`, which fetches prov
 
 ---
 
+### GitHub App `homekube-agent` and `agent-sandbox` (human step)
+
+Agents reach GitHub as the GitHub App `homekube-agent` (ADR-0019), installed only on the repos an agent may work on; for now that is `jangroth/agent-sandbox`, a public trivial codebase (public because rulesets on a personal account's private repos are enforced only with GitHub Pro).
+
+**1. App.** GitHub → Settings → Developer settings → GitHub Apps → New GitHub App:
+
+- Name `homekube-agent`, homepage `https://github.com/jangroth/agent-sandbox`, no callback or setup URL
+- Webhook **inactive**
+- Repository permissions: **Contents** read/write, **Pull requests** read/write, Metadata read; everything else no access
+- Installable **only on this account**
+
+**2. Install** (App → Install App → `jangroth`): **Only select repositories** → `agent-sandbox`. The installation ID is the number at the end of the resulting `/settings/installations/<id>` URL.
+
+**3. Ruleset** on the default branch: PR with one approval (the App can't approve its own PR, so it's the owner's), stale approvals dismissed, no force push or deletion, empty bypass list.
+
+```sh
+gh api -X POST repos/jangroth/agent-sandbox/rulesets --input - <<'EOF'
+{
+  "name": "main: PR + owner approval",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+  "bypass_actors": [],
+  "rules": [
+    { "type": "pull_request", "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": false } },
+    { "type": "non_fast_forward" },
+    { "type": "deletion" }
+  ]
+}
+EOF
+gh api repos/jangroth/agent-sandbox/rules/branches/main --jq '[.[].type]'   # pull_request, non_fast_forward, deletion
+```
+
+**4. Private key.** App → Credentials → Key pairs → New key. Store the `.pem` contents, App ID, Client ID and installation ID in the password manager as "GitHub App homekube-agent", verify (step 5), then delete the download. Not sealed yet: nothing in the cluster uses the key until the token minter of [Spec: Hermes drives Coder](https://github.com/jangroth/homekube/issues/115).
+
+**5. Mint an installation token by hand** (also the verification). Tokens last one hour.
+
+```sh
+PEM=<path-to-pem> APP_ID=<app-id> INSTALLATION_ID=<installation-id>
+b64() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
+now=$(date +%s)
+h=$(printf '{"alg":"RS256","typ":"JWT"}' | b64)
+p=$(printf '{"iat":%d,"exp":%d,"iss":"%s"}' $((now - 60)) $((now + 540)) "$APP_ID" | b64)
+jwt="$h.$p.$(printf '%s.%s' "$h" "$p" | openssl dgst -sha256 -sign "$PEM" | b64)"
+resp=$(curl -fsS -X POST -H "Authorization: Bearer $jwt" \
+  "https://api.github.com/app/installations/$INSTALLATION_ID/access_tokens")
+jq -c '{permissions, repository_selection}' <<<"$resp"   # contents/pull_requests write, metadata read, selected
+TOKEN=$(jq -r .token <<<"$resp")
+curl -fsS -H "Authorization: Bearer $TOKEN" https://api.github.com/installation/repositories \
+  | jq -c '[.repositories[].full_name]'                 # ["jangroth/agent-sandbox"]
+# Revoke when done: curl -fsS -X DELETE -H "Authorization: Bearer $TOKEN" https://api.github.com/installation/token
+```
+
+#### Rotation
+
+- **Private key**, make-before-break: create a new key, store it, mint a token with it (step 5), then delete the old key under Credentials → Key pairs. Tokens already minted stay valid until they expire.
+
+---
+
 ### Renovate PAT (human step)
 
 `.github/workflows/renovate.yml` needs a `RENOVATE_TOKEN` repo secret to open PRs — not creatable by automation.
