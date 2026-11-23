@@ -224,6 +224,10 @@ data:
             - icon: mdi-pipe
               href: https://192.168.86.243/d/a164a7f0339f99e89cea5cb47e9be617?orgId=1&from=now-1h&to=now&var-namespace=observability&var-type=daemonset&var-workload=alloy
               description: ""
+        - Aperture egress:
+            - icon: mdi-router-network
+              href: https://192.168.86.243/d/a87fb0d919ec0ea5f6543124e16c42a5?orgId=1&from=now-1h&to=now&var-namespace=aperture-egress
+              description: ""
         - ArgoCD:
             - icon: argo-cd.png
               href: https://192.168.86.243/d/a87fb0d919ec0ea5f6543124e16c42a5?orgId=1&from=now-1h&to=now&var-namespace=argocd
@@ -294,6 +298,10 @@ data:
         - Alloy:
             - icon: mdi-pipe
               href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22observability%5C%22%2C%20container%3D%5C%22alloy%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
+              description: ""
+        - Aperture egress:
+            - icon: mdi-router-network
+              href: https://192.168.86.243/explore?schemaVersion=1&orgId=1&panes=%7B%22h%22%3A%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22loki%22%2C%22uid%22%3A%22loki%22%7D%2C%22expr%22%3A%22%7Bnamespace%3D%5C%22aperture-egress%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D
               description: ""
         - ArgoCD:
             - icon: argo-cd.png
