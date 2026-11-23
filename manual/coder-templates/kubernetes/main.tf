@@ -30,10 +30,39 @@ locals {
     "com.coder.user.username"    = data.coder_workspace_owner.me.name
   }
   ca_bundle = "/etc/coder-ca/bundle.crt"
+  model     = data.coder_parameter.model.value
+  # Aperture ignores the key; the egress's tailnet identity authenticates.
+  opencode_config = jsonencode({
+    model = "aperture/${local.model}"
+    provider = {
+      aperture = {
+        npm  = "@ai-sdk/openai-compatible"
+        name = "Aperture"
+        options = {
+          baseURL = "http://aperture-egress.aperture-egress.svc/v1"
+          apiKey  = "ts-aperture-managed"
+        }
+        models = { (local.model) = { name = local.model } }
+      }
+    }
+    permission = "allow"
+    autoupdate = false
+    share      = "disabled"
+  })
 }
 
 data "coder_workspace" "me" {}
 data "coder_workspace_owner" "me" {}
+
+# Free-form so a new Aperture model needs no template change.
+data "coder_parameter" "model" {
+  name         = "model"
+  display_name = "OpenCode model"
+  description  = "An Aperture model ID, e.g. qwen/qwen3.8-27b"
+  type         = "string"
+  default      = "qwen/qwen3.8-27b"
+  mutable      = true
+}
 
 data "coder_parameter" "memory" {
   name         = "memory"
@@ -182,6 +211,10 @@ resource "kubernetes_pod_v1" "main" {
       env {
         name  = "CURL_CA_BUNDLE"
         value = local.ca_bundle
+      }
+      env {
+        name  = "OPENCODE_CONFIG_CONTENT"
+        value = local.opencode_config
       }
 
       resources {
