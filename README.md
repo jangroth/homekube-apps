@@ -439,7 +439,12 @@ coder ssh ws1 -- "tr '\0' '\n' </proc/1/environ | grep -c '^TS_'"            # 0
 
 Change the model in the UI: CLI 2.38 against server 2.39 ignored `--parameter` on `coder update`, `restart` and `start`, while the API and UI apply it. Check the pod's environment (`/proc/1/environ`), not a session's: the Coder agent adds `TS_DEBUG_TRIM_WIREGUARD=false` to every session, a networking switch, not a credential.
 
-Renovate's `kubernetes` manager tracks both images in `aperture-egress/deployment.yaml`; they appear on the Dependency Dashboard. `tailscale/tailscale` bumps for the egress and Hermes's sidecar arrive as one grouped PR.
+Renovate's `kubernetes` manager tracks both images in `aperture-egress/deployment.yaml`. `tailscale/tailscale` bumps for the egress and Hermes's sidecar arrive as one grouped PR. To check the tracking without GitHub, run Renovate locally in extract-only mode from a clone in a Docker-shared directory:
+
+```sh
+docker run --rm -e LOG_LEVEL=debug -v "$PWD":/usr/src/app renovate/renovate \
+  --platform=local --dry-run=extract 2>&1 | grep -E '"depName": "(nginxinc/nginx-unprivileged|tailscale/tailscale)"'
+```
 
 ---
 
