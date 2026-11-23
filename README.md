@@ -423,8 +423,8 @@ Things to know:
 coder ssh ws1 -- 'opencode run "Reply with exactly PONG."; echo exit=$?'     # PONG, exit=0
 coder ssh ws1 -- 'opencode run -m aperture/nope "Reply PONG."; echo exit=$?' # error, exit=1
 
-# The model parameter switches the model (the header line shows it)
-coder update ws1 --parameter model=qwen/qwen3.8-flash
+# The model parameter switches the model (the header line shows it).
+# UI: workspace → Settings → Parameters → OpenCode model = qwen/qwen3.8-flash, then restart.
 coder ssh ws1 -- 'opencode run "Reply PONG." | head -3'                       # build · qwen/qwen3.8-flash
 
 # Only workspaces reach the egress
@@ -434,8 +434,10 @@ kubectl run ae-probe -n default --rm -it --restart=Never --image=curlimages/curl
 
 # No tailnet credential in coder-workspaces
 kubectl -n coder-workspaces get secrets -o name                               # no tailscale Secret
-coder ssh ws1 -- 'env | grep -c "^TS_"'                                       # 0
+coder ssh ws1 -- "tr '\0' '\n' </proc/1/environ | grep -c '^TS_'"            # 0
 ```
+
+Change the model in the UI: CLI 2.38 against server 2.39 ignored `--parameter` on `coder update`, `restart` and `start`, while the API and UI apply it. Check the pod's environment (`/proc/1/environ`), not a session's: the Coder agent adds `TS_DEBUG_TRIM_WIREGUARD=false` to every session, a networking switch, not a credential.
 
 Renovate's `kubernetes` manager tracks both images in `aperture-egress/deployment.yaml`; they appear on the Dependency Dashboard. `tailscale/tailscale` bumps for the egress and Hermes's sidecar arrive as one grouped PR.
 
