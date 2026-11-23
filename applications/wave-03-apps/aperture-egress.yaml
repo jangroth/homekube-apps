@@ -25,7 +25,7 @@ spec:
       name: aperture-egress-tailscale-state
       jsonPointers:
         - /data
-  # Plain manifests, no chart (ADR-0020).
+  # Plain manifests, no chart.
   source:
     repoURL: https://github.com/jangroth/homekube-apps.git
     path: applications/wave-03-apps/aperture-egress

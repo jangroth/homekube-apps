@@ -64,6 +64,13 @@
       "allowedVersions": "/^\\d+\\.\\d+\\.\\d+$/"
     },
     {
+      "description": "Hermes's sidecar and the Aperture egress run the same tailscale release",
+      "matchDatasources": ["docker"],
+      "matchDepNames": ["tailscale/tailscale"],
+      "groupName": "tailscale",
+      "groupSlug": "tailscale"
+    },
+    {
       "description": "Postgres/Redis majors need a manual data migration",
       "matchDatasources": ["docker"],
       "matchDepNames": ["postgres", "redis"],

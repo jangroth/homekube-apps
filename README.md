@@ -403,7 +403,7 @@ The key is only used for the first join: the pod keeps its tailnet identity in i
 
 ### OpenCode through the Aperture egress (human step)
 
-`aperture-egress` (namespace `aperture-egress`) is one pod with two containers. `tailscale` joins the tailnet as `homekube-aperture-egress` in kernel mode with `--shields-up`. `nginx` serves plain HTTP on `aperture-egress.aperture-egress.svc:80` and proxies to Aperture's tailnet IP `100.126.29.31` with `Host: ai.taild13083.ts.net`, unbuffered so streamed completions pass through. A NetworkPolicy admits only namespace `coder-workspaces`. Aperture sees every workspace as this one device.
+`aperture-egress` (namespace `aperture-egress`) is one pod with two containers. `tailscale` joins the tailnet as `homekube-aperture-egress` in kernel mode with `--shields-up`. `nginx` serves plain HTTP on `aperture-egress.aperture-egress.svc:80` and proxies `/v1/` only (everything else is 404, so Aperture's connectors stay out of reach) to Aperture's tailnet IP `100.126.29.31` with `Host: ai.taild13083.ts.net`, unbuffered so streamed completions pass through. A NetworkPolicy admits only namespace `coder-workspaces`. Aperture sees every workspace as this one device.
 
 The Coder template passes OpenCode its whole config in `OPENCODE_CONFIG_CONTENT`: one `openai-compatible` provider `aperture` at the egress, model `aperture/<model>` from the mutable **OpenCode model** parameter (default `qwen/qwen3.8-27b`, any Aperture model ID), `permission: allow`, no autoupdate, no sharing. Nothing is written to the home volume; the config is rebuilt on every start.
 
@@ -411,6 +411,7 @@ Things to know:
 
 - Aperture's tailnet IP is pinned here (`aperture-egress/configmap.yaml`) and in Hermes's chart values; change both if it moves.
 - A ConfigMap change doesn't restart the pod: `kubectl -n aperture-egress rollout restart deploy/aperture-egress`.
+- The NetworkPolicy covers pods only: Cilium still admits node and hostNetwork traffic by default.
 - `opencode run` exits 0 on an answer and 1 on an error (unknown model: Aperture's `no route found for model`; egress unreachable: `ECONNREFUSED` after about 11 retries).
 
 **1. After merge.** ArgoCD syncs the egress. Check the device `homekube-aperture-egress` appears in the Tailscale admin console with `tag:coder-workspaces`. Then push the template as in [Coder](#coder-human-step) step 3 and update the workspace (`coder update <workspace>`).
@@ -436,9 +437,7 @@ kubectl -n coder-workspaces get secrets -o name                               # 
 coder ssh ws1 -- 'env | grep -c "^TS_"'                                       # 0
 ```
 
-If plain `opencode run` hangs or fails where `opencode run --standalone` works, OpenCode's background service is the cause; scripted runs then use `--standalone`.
-
-Renovate's `kubernetes` manager tracks both images in `aperture-egress/deployment.yaml`; they appear on the Dependency Dashboard. Bump `tailscale/tailscale` together with Hermes's sidecar.
+Renovate's `kubernetes` manager tracks both images in `aperture-egress/deployment.yaml`; they appear on the Dependency Dashboard. `tailscale/tailscale` bumps for the egress and Hermes's sidecar arrive as one grouped PR.
 
 ---
 

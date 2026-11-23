@@ -11,7 +11,12 @@ data:
       listen 8080;
       server_tokens off;
 
+      # Only the LLM API; Aperture's connectors stay out of reach.
       location / {
+        return 404;
+      }
+
+      location /v1/ {
         # Aperture's tailnet IP: MagicDNS doesn't resolve in-pod.
         proxy_pass http://100.126.29.31;
         proxy_set_header Host ai.taild13083.ts.net;
