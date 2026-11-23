@@ -401,6 +401,39 @@ The key is only used for the first join: the pod keeps its tailnet identity in i
 
 ---
 
+### Agent Vault for workspaces (human step)
+
+Workspaces reach GitHub through the Agent Vault proxy (ADR-0012), which attaches the `homekube-agent` installation token; workspaces hold only a session token. One bundle and one session serve every workspace until per-task sessions arrive ([Spec: Hermes drives Coder](https://github.com/jangroth/homekube/issues/115)).
+
+**1. Infisical UI** (default Agent Vault project, as for [Agent Vault proxy](#agent-vault-proxy-human-step)). The session token is shown once: store it in the password manager before closing the dialog.
+
+- **Global variable** `GH_TOKEN_AGENT_SANDBOX`: the installation token for `agent-sandbox`. Both services reference it, so one edit updates both.
+- **Access bundle** `coder-workspaces`, with services:
+  - `github-git`: host `github.com`, methods `GET`, `POST`, no paths. Basic credential: username `x-access-token`, password `{{GH_TOKEN_AGENT_SANDBOX}}`.
+  - `github-api`: host `api.github.com`, methods `GET`, `POST`, `PATCH`, `PUT`, `DELETE`, no paths. Bearer credential: header `Authorization`, prefix `Bearer`, value `{{GH_TOKEN_AGENT_SANDBOX}}`.
+- **Session** on bundle `coder-workspaces`, label `coder-workspaces`, expiry **Never**. Store the **session token** as "Agent Vault session token (coder-workspaces bundle)".
+
+**2. Seal the session** (in a terminal; `read -s` needs a tty):
+
+```sh
+seal() { kubeseal --controller-name sealed-secrets --controller-namespace kube-system -o json; }
+
+# The session token is the password half of the workspace's HTTPS_PROXY URL.
+read -s "ST?Session token: "; echo
+kubectl create secret generic agent-vault-session -n coder-workspaces \
+  --from-literal=HTTPS_PROXY="http://x-agent-vault:${ST}@agent-vault-proxy.agent-vault.svc:17323" \
+  --dry-run=client -o json \
+| seal > applications/wave-03-apps/coder-extras/agent-vault-session-sealedsecret.yaml
+unset ST
+```
+
+#### Rotation
+
+- **GitHub token**: set `GH_TOKEN_AGENT_SANDBOX` to a token minted as in [GitHub App `homekube-agent`](#github-app-homekube-agent-and-agent-sandbox-human-step) step 5. The proxy picks it up within one poll interval (60s); workspaces are untouched.
+- **Session**, make-before-break: create a new session on bundle `coder-workspaces`, store its token, reseal (step 2), merge, and recreate running workspaces. Once a new workspace's git operation shows `brokered`, revoke the old session. Revoking cuts every workspace off from GitHub, which is also the kill switch.
+
+---
+
 ### Renovate PAT (human step)
 
 `.github/workflows/renovate.yml` needs a `RENOVATE_TOKEN` repo secret to open PRs — not creatable by automation.
