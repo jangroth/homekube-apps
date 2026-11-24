@@ -32,7 +32,7 @@ spec:
       valuesObject:
         image:
           # renovate: datasource=docker depName=nousresearch/hermes-agent
-          tag: v0.22.2
+          tag: v0.23.4
         tailscale:
           # renovate: datasource=docker depName=tailscale/tailscale
           tag: v1.104.7
