@@ -38,6 +38,7 @@
   "labels": ["dependencies"],
   "assignees": ["jangroth"],
   "prConcurrentLimit": 5,
+  "prHourlyLimit": 0,
   "gitAuthor": "Renovate <359655+jangroth@users.noreply.github.com>",
   "packageRules": [
     {
