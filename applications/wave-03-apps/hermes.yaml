@@ -35,7 +35,7 @@ spec:
           tag: v0.22.2
         tailscale:
           # renovate: datasource=docker depName=tailscale/tailscale
-          tag: v1.104.2
+          tag: v1.104.7
         stateExport:
           betterleaks:
             # renovate: datasource=docker depName=ghcr.io/betterleaks/betterleaks
