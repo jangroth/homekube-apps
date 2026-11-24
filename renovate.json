@@ -40,7 +40,6 @@
   "automerge": false,
   "labels": ["dependencies"],
   "assignees": ["jangroth"],
-  "reviewers": ["jangroth"],
   "prConcurrentLimit": 5,
   "packageRules": [
     {
