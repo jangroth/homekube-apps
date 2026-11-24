@@ -19,7 +19,7 @@ provider "kubernetes" {}
 locals {
   namespace = "coder-workspaces"
   # renovate: datasource=docker depName=ghcr.io/jangroth/homekube-bakery/coder-workspace
-  image = "ghcr.io/jangroth/homekube-bakery/coder-workspace:0.3.0@sha256:9283741288d93b5061c46bd5743bb563e9719c9def6202fd400f9223e25cafe1"
+  image = "ghcr.io/jangroth/homekube-bakery/coder-workspace:0.3.4@sha256:f98e88c57ff3a0f6bc6d73bc34abc67fb2f11cfeacb80fa75e9f2d8d7a41d557"
   labels = {
     "app.kubernetes.io/name"     = "coder-workspace"
     "app.kubernetes.io/instance" = "coder-${data.coder_workspace.me.id}"
