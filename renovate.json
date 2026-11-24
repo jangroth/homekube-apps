@@ -41,6 +41,7 @@
   "labels": ["dependencies"],
   "assignees": ["jangroth"],
   "prConcurrentLimit": 5,
+  "gitAuthor": "Renovate <359655+jangroth@users.noreply.github.com>",
   "packageRules": [
     {
       "description": "Group minor and patch Helm chart updates to reduce PR noise",
