@@ -40,7 +40,7 @@ spec:
                     operator: DoesNotExist
       containers:
         - name: postgres
-          image: postgres:17.11
+          image: postgres:17.12
           imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
