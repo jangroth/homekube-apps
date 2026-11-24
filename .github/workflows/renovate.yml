@@ -2,7 +2,7 @@ name: Renovate
 
 on:
   schedule:
-    - cron: '0 2 * * 1'  # Weekly, Monday 02:00 UTC — must fall inside renovate.json's schedule:weekly window (before 4 AM UTC Monday)
+    - cron: '0 2 * * 1'  # Weekly, Monday 02:00 UTC; the only schedule, renovate.json sets none
   workflow_dispatch:
 
 jobs:

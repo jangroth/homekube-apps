@@ -490,7 +490,7 @@ unset ST
 3. Permissions: **Contents** (read/write), **Pull requests** (read/write), **Issues** (read/write) for the Dependency Dashboard — no `github-actions` manager is enabled, so no workflow-file permission is needed
 4. Add as repo secret `RENOVATE_TOKEN`: Settings → Secrets and variables → Actions
 
-Trigger a run manually instead of waiting for the weekly cron (Monday 06:00 UTC):
+Trigger a run manually instead of waiting for the weekly cron (Monday 02:00 UTC; GitHub often starts it hours late):
 
 ```sh
 gh workflow run renovate.yml --repo jangroth/homekube-apps

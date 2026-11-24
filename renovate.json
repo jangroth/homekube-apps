@@ -1,9 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "schedule:weekly"
-  ],
+  "extends": ["config:recommended"],
   "enabledManagers": ["argocd", "kubernetes", "github-actions", "custom.regex"],
   "customManagers": [
     {
