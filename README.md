@@ -487,7 +487,7 @@ unset ST
 
 1. GitHub → Settings → Developer settings → Fine-grained tokens → new token
 2. Repository access: only this repo (`jangroth/homekube-apps`)
-3. Permissions: **Contents** (read/write), **Pull requests** (read/write) — no `github-actions` manager is enabled, so no workflow-file permission is needed
+3. Permissions: **Contents** (read/write), **Pull requests** (read/write), **Issues** (read/write) for the Dependency Dashboard — no `github-actions` manager is enabled, so no workflow-file permission is needed
 4. Add as repo secret `RENOVATE_TOKEN`: Settings → Secrets and variables → Actions
 
 Trigger a run manually instead of waiting for the weekly cron (Monday 06:00 UTC):
