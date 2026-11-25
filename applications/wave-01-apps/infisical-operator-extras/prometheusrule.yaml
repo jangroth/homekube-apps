@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: infisical-secret-sync
+  namespace: infisical-operator
+  labels:
+    app.kubernetes.io/name: secrets-operator
+    release: prometheus
+spec:
+  groups:
+    - name: infisical-secret-sync
+      rules:
+        - alert: InfisicalSecretSyncErrors
+          # Window exceeds the controller's 1000s max retry backoff.
+          expr: increase(controller_runtime_reconcile_errors_total{namespace="infisical-operator", controller="infisicalsecret"}[20m]) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: InfisicalSecret reconciles have been failing for 15m.
+            description: Some cluster secrets aren't syncing from Infisical. Check `kubectl get infisicalsecret -A` for a non-Ready status and the infisical-operator logs.

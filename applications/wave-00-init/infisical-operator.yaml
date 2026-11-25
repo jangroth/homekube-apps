@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infisical-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infisical-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  sources:
+    - repoURL: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
+      chart: secrets-operator
+      targetRevision: 0.11.18
+      helm:
+        values: |
+          # Chart truncates names to 15 characters.
+          fullnameOverride: infisical
+          hostAPI: https://infisical-https.infisical.svc.cluster.local/api
+          # Hooks hang ArgoCD syncs until the whole app is healthy.
+          defaultResourcesHelmHooks: false
+          # ServiceMonitor lives in infisical-operator-extras (wave 01, after its CRD).
+          telemetry:
+            serviceMonitor:
+              enabled: false
+    - repoURL: https://github.com/jangroth/homekube-apps.git
+      path: applications/wave-00-init/infisical-operator
+      targetRevision: HEAD
