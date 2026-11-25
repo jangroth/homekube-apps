@@ -55,6 +55,9 @@ spec:
                 value: https://192.168.86.247
               - name: HTTPS_ENABLED
                 value: "true"
+              # Kubernetes Auth reviews tokens against the API server's private IP.
+              - name: ALLOW_INTERNAL_IP_CONNECTIONS
+                value: "true"
 
             # Backend is HTTP-only; nginx terminates TLS for the infisical-https Service.
             extraContainers:
