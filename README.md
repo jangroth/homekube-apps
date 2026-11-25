@@ -173,6 +173,29 @@ kubectl delete pv infisical-restore-pg
 kubectl -n longhorn-system delete volumes.longhorn.io infisical-restore-pg
 ```
 
+**4. Alert drills.** Both alerts route to Telegram. `root-app` restores each child Application's sync policy, and the child app restores its resources, so pause both for the drill and resume them in reverse order:
+
+```sh
+argocd login 192.168.86.241 --username admin --insecure --grpc-web
+
+# InfisicalDown: fires after 10m without a ready replica
+argocd app set root-app --sync-policy none
+argocd app set infisical --sync-policy none
+kubectl -n infisical scale deploy/infisical --replicas=0
+# … wait for the Telegram alert, then:
+argocd app set infisical --sync-policy automated --self-heal --auto-prune   # restores replicas from git
+argocd app set root-app --sync-policy automated --self-heal --auto-prune
+
+# InfisicalSecretSyncErrors: fires after 15m of failed reconciles
+argocd app set root-app --sync-policy none
+argocd app set homepage --sync-policy none
+kubectl -n homepage patch infisicalsecret homepage-widget-secrets --type merge \
+  -p '{"spec":{"authentication":{"kubernetesAuth":{"serviceAccountRef":{"name":"no-such-sa"}}}}}'
+# … wait for the Telegram alert, then:
+argocd app set homepage --sync-policy automated --self-heal --auto-prune   # restores the InfisicalSecret from git
+argocd app set root-app --sync-policy automated --self-heal --auto-prune
+```
+
 ---
 
 ### Agent Vault proxy (human step)
