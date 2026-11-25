@@ -5,6 +5,8 @@ metadata:
   namespace: homepage
   labels:
     app.kubernetes.io/name: homepage
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   revisionHistoryLimit: 3

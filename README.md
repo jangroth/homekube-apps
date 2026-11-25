@@ -86,7 +86,7 @@ kubectl create secret generic alertmanager-telegram \
 
 ### Homepage widget credentials (human step)
 
-The Homepage dashboard ([spec 007](https://github.com/jangroth/homekube/blob/main/docs/archive/specs/007-homepage-dashboard.md)) authenticates its ArgoCD widget with an API token. The token cannot be pre-generated in source — it is minted imperatively and committed as a sealed secret. On a cluster rebuild, re-mint and re-seal (same recovery story as the other sealed secrets on this page).
+The Homepage dashboard ([spec 007](https://github.com/jangroth/homekube/blob/main/docs/archive/specs/007-homepage-dashboard.md)) authenticates its ArgoCD widget with an API token. The token cannot be pre-generated in source: it is minted by hand and entered in Infisical, and the Infisical operator syncs it into the Secret `homepage-widget-secrets` (`applications/wave-03-apps/homepage/infisicalsecret.yaml`). Homepage's project and machine identity come from `homekube-main`'s `terraform/infisical/` ("Infisical configuration (human step)" in its README). On a cluster rebuild, re-apply that Terraform, then re-mint the token. If Infisical was rebuilt empty rather than restored, the identity is new: set `identityId` in `infisicalsecret.yaml` to its `terraform output identity_ids`.
 
 > Grafana gets a **link only, no widget**: Homepage's Grafana widget unconditionally calls `/api/admin/stats`, which requires Grafana server-admin credentials — unacceptable in the pod env of an unauthenticated dashboard. See spec 007, Open Question 2.
 
@@ -94,21 +94,33 @@ The Homepage dashboard ([spec 007](https://github.com/jangroth/homekube/blob/mai
 
 ```sh
 argocd login 192.168.86.241 --username admin --insecure --grpc-web
+argocd account get --account homepage            # note the IDs of tokens to revoke afterwards
 argocd account generate-token --account homepage
 ```
 
-**2. Seal the token:**
+**2. Enter it in Infisical.** UI (`https://192.168.86.247`) → project `homepage` → Production → path `/` → Add Secret: key `HOMEPAGE_VAR_ARGOCD_TOKEN`, value the token. Homepage restarts with it within about a minute (`syncConfig.resyncInterval` plus `secrets.infisical.com/auto-reload`).
+
+**3. Verify and revoke the old token.**
 
 ```sh
-kubectl create secret generic homepage-widget-secrets \
-  --from-literal=HOMEPAGE_VAR_ARGOCD_TOKEN=<ARGOCD_TOKEN> \
-  --namespace homepage \
-  --dry-run=client -o yaml | \
-  kubeseal \
-    --controller-name sealed-secrets \
-    --controller-namespace kube-system \
-    --namespace homepage \
-  > applications/wave-03-apps/homepage/sealedsecret.yaml
+kubectl -n homepage get infisicalsecret homepage-widget-secrets   # READY True
+kubectl -n homepage get secret homepage-widget-secrets -o jsonpath='{.metadata.ownerReferences[0].kind}'   # InfisicalSecret
+argocd account delete-token --account homepage <old token ID>
+```
+
+**4. Check the identity is limited to its own project.** Log in as Homepage's machine identity with its service-account token, then read its own project and another one:
+
+```sh
+kubectl -n infisical port-forward deploy/infisical 8080:8080 &
+ID=$(kubectl -n homepage get infisicalsecret homepage-widget-secrets -o jsonpath='{.spec.authentication.kubernetesAuth.identityId}')
+JWT=$(kubectl -n homepage create token infisical-auth --duration=10m)
+TOKEN=$(curl -fsS http://localhost:8080/api/v1/auth/kubernetes-auth/login -H 'Content-Type: application/json' \
+  -d "{\"identityId\":\"$ID\",\"jwt\":\"$JWT\"}" | jq -r .accessToken)
+curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
+  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=homepage&environment=prod&secretPath=/'           # 200
+curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
+  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=<another project slug>&environment=prod&secretPath=/'   # 403 or 404
+unset ID JWT TOKEN; kill %1
 ```
 
 ---
