@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: infisical-server
+  namespace: infisical
+  labels:
+    app.kubernetes.io/name: infisical
+    release: prometheus
+spec:
+  groups:
+    - name: infisical-server
+      rules:
+        - alert: InfisicalDown
+          expr: kube_deployment_status_replicas_available{namespace="infisical", deployment="infisical"} < 1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: Infisical has had no ready replica for 10m.
+            description: Cluster secrets can't sync or rotate until the infisical Deployment in namespace infisical is ready again.
