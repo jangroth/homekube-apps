@@ -67,7 +67,8 @@ spec:
           persistence:
             volumeClaimsEnabled: true
             # chart default deletes the PVC when scaled to 0
-            enableStatefulSetAutoDeletePVC: false
+            whenScaled: Retain
+            whenDeleted: Retain
             size: 20Gi
             storageClass: longhorn
           resources:
