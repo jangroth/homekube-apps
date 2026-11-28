@@ -209,24 +209,20 @@ An Infisical outage also fails every InfisicalSecret's resync, so an outage of 1
 
 The Agent Vault proxy ([spec 010](https://github.com/jangroth/homekube/blob/main/docs/archive/specs/010-agent-vault-hermes.md)) attaches Hermes's API credentials to its outbound requests, so Hermes only holds a session token. Its proxy, services, bundle and session live in Infisical and are created in the UI. Needs Infisical `>= v0.167.2` (proxy tokens); older servers only issue enrollment tokens, which `infisical/cli >= 0.44.7` can't use.
 
-**1. Infisical UI** (`https://192.168.86.247`, default Agent Vault project; the open-source edition can't create others). Each token is shown once: store it in the password manager before closing the dialog.
+**1. Infisical UI** (`https://192.168.86.247`, default Agent Vault project; the open-source edition can't create others). Each token is shown once: keep the dialog open until step 2 has it stored.
 
-- **Proxy** `homekube`: Advanced Options → traffic policy **Any host**, poll interval `60`. Store the **proxy token** as "Agent Vault proxy token (homekube)".
+- **Proxy** `homekube`: Advanced Options → traffic policy **Any host**, poll interval `60`. The **proxy token** goes into Infisical (step 2), not the password manager.
 - **Access bundle** `hermes`, with services:
   - `tavily`: host `api.tavily.com`, method `POST`, paths `/search`, `/extract`. Bearer credential: header `Authorization`, prefix `Bearer`, value the real Tavily key.
   - `telegram`: host `api.telegram.org`, methods `GET`, `POST`, no paths, no credential. One substitution on surface **Path** (not Header: the token is in `/bot<token>/…`), placeholder `agent-vault-telegram`, value the real bot token.
 - **Session** on bundle `hermes`, label `hermes`, expiry **Never**. Store the **session token** as "Agent Vault session token (hermes bundle)".
 
-**2. Seal both tokens.** `read -s` keeps them out of shell history (zsh syntax; bash: `read -s -p "Proxy token: " PT`).
+**2. Store both tokens.** The proxy token comes from Infisical project `agent-vault` (`applications/wave-03-apps/agent-vault/infisicalsecret.yaml`), whose project and machine identity come from `homekube-main`'s `terraform/infisical/`. If Infisical was rebuilt empty rather than restored, set `identityId` to `agent-vault` from its `terraform output identity_ids`. Infisical UI → project `agent-vault` → Production → path `/` → key `INFISICAL_AGENT_VAULT_PROXY_TOKEN`, value the proxy token. It syncs into `agent-vault/agent-vault-proxy-token`, and the proxy restarts within about a minute of a change (`syncConfig.resyncInterval` plus `secrets.infisical.com/auto-reload`).
+
+Hermes's session token is still sealed. `read -s` keeps it out of shell history (zsh syntax; bash: `read -s -p "Session token: " ST`).
 
 ```sh
 seal() { kubeseal --controller-name sealed-secrets --controller-namespace kube-system -o json; }
-
-read -s "PT?Proxy token: "; echo
-kubectl create secret generic agent-vault-proxy-token -n agent-vault \
-  --from-literal=INFISICAL_AGENT_VAULT_PROXY_TOKEN="$PT" --dry-run=client -o json \
-| seal > applications/wave-03-apps/agent-vault/proxy-token-sealedsecret.yaml
-unset PT
 
 # The session token is the password half of Hermes's HTTPS_PROXY URL.
 read -s "ST?Session token: "; echo
@@ -264,14 +260,46 @@ kubectl -n hermes rollout restart deploy/hermes
 
 Check with a web search from Hermes: the proxy log (`kubectl -n agent-vault logs deploy/agent-vault-proxy`) shows `"decision":"brokered"` for service `tavily`; a Telegram message shows `telegram` lines with `"substituted":["path"]`. Passthrough requests are not logged at info, so a substitution that doesn't fire leaves no trace: Telegram rejects the placeholder and Hermes parks the platform until `hermes gateway restart`.
 
-On a rebuild, re-seal both from the password manager. A new proxy token re-enrolls the proxy and changes its CA, so `caCert` has to be fetched again; a new session only needs `encryptedHttpsProxy` resealed.
+On a rebuild, re-seal the session from the password manager; the proxy token comes back with Infisical's backup. A new proxy token re-enrolls the proxy and changes its CA, so `caCert` has to be fetched again; a new session only needs `encryptedHttpsProxy` resealed.
 
 #### Rotation
 
 - **Brokered key** (e.g. Tavily): edit the credential on the service in bundle `hermes`. The proxy picks it up within one poll interval (60s); Hermes is untouched. If Hermes saw a 401 meanwhile it marks the key exhausted: `kubectl -n hermes exec deploy/hermes -c hermes -- su -s /bin/sh hermes -c 'hermes auth reset tavily'`.
 - **Telegram bot token**: BotFather `/revoke` issues the new token at once and kills the old one; set it as the `telegram` substitution value. Polls in between get 401 and may park Telegram, so restart Hermes if it stops replying.
-- **Session**, make-before-break: create a new session on bundle `hermes`, store its token, reseal (step 2, second block), set `encryptedHttpsProxy` (step 3) and merge. The checksum annotation restarts Hermes. Once a web search shows `brokered`, revoke the old session. A revoked session gets 403 on every proxied request, so revoking first cuts off all of Hermes's web access.
-- **Proxy token**: create a new token on proxy `homekube`, store it, reseal `agent-vault-proxy-token` (step 2, first block) and merge, then restart the proxy (`kubectl -n agent-vault rollout restart deploy/agent-vault-proxy`). If the CA fingerprint on the Proxies page changed, redo step 3's `caCert`. A revoked proxy token gets 503 on every request.
+- **Session**, make-before-break: create a new session on bundle `hermes`, store its token, reseal (step 2), set `encryptedHttpsProxy` (step 3) and merge. The checksum annotation restarts Hermes. Once a web search shows `brokered`, revoke the old session. A revoked session gets 403 on every proxied request, so revoking first cuts off all of Hermes's web access.
+- **Proxy token**, make-before-break: create a new token on proxy `homekube` and set it as `INFISICAL_AGENT_VAULT_PROXY_TOKEN` (step 2); the proxy restarts on its own. If the CA fingerprint on the Proxies page changed, redo step 3's `caCert`. Once a web search from Hermes shows `brokered`, revoke the old token. A revoked proxy token gets 503 on every request.
+
+#### Verify
+
+The Secret is owned by its InfisicalSecret, and Agent Vault's identity reads its own project only. If the Secret is missing while its InfisicalSecret reports synced, restart the operator (homekube#132 (deleted Secret not recreated)): `kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager`.
+
+```sh
+kubectl -n agent-vault get infisicalsecret        # agent-vault-proxy-token: READY True
+kubectl -n agent-vault get secret agent-vault-proxy-token -o jsonpath='{.metadata.ownerReferences[*].kind}{"\n"}'   # InfisicalSecret only
+
+# Another project's slug: copy it from that project's Settings (a made-up slug returns 404 whatever the permissions)
+kubectl -n infisical port-forward deploy/infisical 8080:8080 & sleep 3
+ID=$(kubectl -n agent-vault get infisicalsecret agent-vault-proxy-token -o jsonpath='{.spec.authentication.kubernetesAuth.identityId}')
+JWT=$(kubectl -n agent-vault create token infisical-auth --duration=10m)
+TOKEN=$(curl -fsS http://localhost:8080/api/v1/auth/kubernetes-auth/login -H 'Content-Type: application/json' \
+  -d "{\"identityId\":\"$ID\",\"jwt\":\"$JWT\"}" | jq -r .accessToken)
+curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
+  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=agent-vault&environment=prod&secretPath=/'          # 200
+curl -s -H "Authorization: Bearer $TOKEN" \
+  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=<another project slug>&environment=prod&secretPath=/' | jq -r .message   # "You are not a member of this project …"
+unset ID JWT TOKEN; kill %1
+```
+
+Then run a web search from Hermes: the proxy log shows `"decision":"brokered"` for `tavily`.
+
+#### Cutover from sealed secrets
+
+One-time, homekube#124 (Agent Vault's proxy token from Infisical). ArgoCD's prune of the SealedSecret deletes today's Secret; the running proxy keeps its old token until it restarts, but a restart before Infisical has the value leaves it down.
+
+1. Create a new token on proxy `homekube` and enter it in Infisical (step 2). Keep the old token.
+2. Merge. Once ArgoCD has synced, restart the operator (homekube#132 (deleted Secret not recreated)), then run **Verify**.
+3. If the CA fingerprint on the Proxies page changed, redo step 3's `caCert`; Hermes's requests fail TLS until it is merged.
+4. Revoke the old token, and delete "Agent Vault proxy token (homekube)" from the password manager.
 
 ---
 
