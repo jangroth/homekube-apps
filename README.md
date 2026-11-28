@@ -103,12 +103,12 @@ argocd account generate-token --account homepage
 **3. Verify and revoke the old token.**
 
 ```sh
-kubectl -n homepage get infisicalsecret homepage-widget-secrets   # READY True
+kubectl -n homepage get infisicalsecret homepage-widget-secrets -o jsonpath='{.status.conditions[*].status}{"\n"}'   # True True True
 kubectl -n homepage get secret homepage-widget-secrets -o jsonpath='{.metadata.ownerReferences[0].kind}'   # InfisicalSecret
 argocd account delete-token --account homepage <old token ID>
 ```
 
-If `homepage-widget-secrets` is missing while the InfisicalSecret reports synced, restart the operator: it skips unchanged secrets without checking the Secret still exists (homekube#132, deleted Secret not recreated).
+If `homepage-widget-secrets` is missing while the InfisicalSecret reports synced, restart the operator: it skips unchanged secrets without checking the Secret still exists, see homekube#132 (deleted Secret not recreated).
 
 ```sh
 kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager
@@ -331,10 +331,9 @@ unset PGPW
 **Verify** after any change: the Secrets are owned by their InfisicalSecrets, and Coder's identity reads its own project only. If a Secret is missing while its InfisicalSecret reports synced, restart the operator (homekube#132 (deleted Secret not recreated)): `kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager`.
 
 ```sh
-kubectl -n coder get infisicalsecret                          # coder-secrets, postgres-credentials: READY True
-kubectl -n coder-workspaces get infisicalsecret               # agent-vault-session: READY True
 for s in coder/coder-secrets coder/postgres-credentials coder-workspaces/agent-vault-session; do
-  kubectl -n ${s%/*} get secret ${s#*/} -o jsonpath="${s}: {.metadata.ownerReferences[*].kind}{'\n'}"   # InfisicalSecret only
+  kubectl -n ${s%/*} get infisicalsecret ${s#*/} -o jsonpath="${s}: {.status.conditions[*].status}{'\n'}"     # True True True
+  kubectl -n ${s%/*} get secret ${s#*/} -o jsonpath="${s}: {.metadata.ownerReferences[*].kind}{'\n'}"         # InfisicalSecret only
 done
 
 # Another project's slug: copy it from that project's Settings (a made-up slug returns 404 whatever the permissions)
@@ -391,7 +390,7 @@ Smoke test after a template change:
 coder create ws1 --template kubernetes --yes
 coder ssh ws1 -- 'echo hello > ~/persist.txt'
 coder stop ws1 --yes && coder start ws1 --yes
-coder ssh ws1 -- cat ~/persist.txt                  # hello
+coder ssh ws1 -- 'cat ~/persist.txt'                # hello
 coder delete ws1 --yes
 kubectl -n coder-workspaces get pod,pvc             # nothing left
 ```
