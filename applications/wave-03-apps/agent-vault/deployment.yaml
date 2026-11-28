@@ -5,6 +5,8 @@ metadata:
   namespace: agent-vault
   labels:
     app.kubernetes.io/name: agent-vault-proxy
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   revisionHistoryLimit: 3

@@ -1,0 +1,20 @@
+# Only the operator uses this service account's token; the proxy pod doesn't mount it.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: infisical-auth
+  namespace: agent-vault
+---
+# Infisical Kubernetes Auth reviews the client's own token.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: agent-vault-infisical-auth
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: infisical-auth
+    namespace: agent-vault
