@@ -114,20 +114,7 @@ If `homepage-widget-secrets` is missing while the InfisicalSecret reports synced
 kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager
 ```
 
-**4. Check the identity is limited to its own project.** Log in as Homepage's machine identity with its service-account token, then read its own project and another one. Project slugs carry a random suffix (e.g. `test-project-jzs-o`): copy the other project's slug from its Settings, since a made-up slug returns 404 whatever the permissions.
-
-```sh
-kubectl -n infisical port-forward deploy/infisical 8080:8080 & sleep 3
-ID=$(kubectl -n homepage get infisicalsecret homepage-widget-secrets -o jsonpath='{.spec.authentication.kubernetesAuth.identityId}')
-JWT=$(kubectl -n homepage create token infisical-auth --duration=10m)
-TOKEN=$(curl -fsS http://localhost:8080/api/v1/auth/kubernetes-auth/login -H 'Content-Type: application/json' \
-  -d "{\"identityId\":\"$ID\",\"jwt\":\"$JWT\"}" | jq -r .accessToken)
-curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
-  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=homepage&environment=prod&secretPath=/'           # 200
-curl -s -H "Authorization: Bearer $TOKEN" \
-  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=<another project slug>&environment=prod&secretPath=/' | jq -r .message   # "You are not a member of this project …"
-unset ID JWT TOKEN; kill %1
-```
+The identity's isolation is checked once per Terraform apply, not here (`homekube-main` README, "Infisical configuration (human step)").
 
 ---
 
@@ -271,23 +258,11 @@ On a rebuild, re-seal the session from the password manager; the proxy token com
 
 #### Verify
 
-The Secret is owned by its InfisicalSecret, and Agent Vault's identity reads its own project only. If the Secret is missing while its InfisicalSecret reports synced, restart the operator (homekube#132 (deleted Secret not recreated)): `kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager`.
+The Secret is owned by its InfisicalSecret. The identity's isolation is checked once per Terraform apply, not here (`homekube-main` README, "Infisical configuration (human step)"). If the Secret is missing while its InfisicalSecret reports synced, restart the operator (homekube#132 (deleted Secret not recreated)): `kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager`.
 
 ```sh
 kubectl -n agent-vault get infisicalsecret        # agent-vault-proxy-token: READY True
 kubectl -n agent-vault get secret agent-vault-proxy-token -o jsonpath='{.metadata.ownerReferences[*].kind}{"\n"}'   # InfisicalSecret only
-
-# Another project's slug: copy it from that project's Settings (a made-up slug returns 404 whatever the permissions)
-kubectl -n infisical port-forward deploy/infisical 8080:8080 & sleep 3
-ID=$(kubectl -n agent-vault get infisicalsecret agent-vault-proxy-token -o jsonpath='{.spec.authentication.kubernetesAuth.identityId}')
-JWT=$(kubectl -n agent-vault create token infisical-auth --duration=10m)
-TOKEN=$(curl -fsS http://localhost:8080/api/v1/auth/kubernetes-auth/login -H 'Content-Type: application/json' \
-  -d "{\"identityId\":\"$ID\",\"jwt\":\"$JWT\"}" | jq -r .accessToken)
-curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
-  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=agent-vault&environment=prod&secretPath=/'          # 200
-curl -s -H "Authorization: Bearer $TOKEN" \
-  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=<another project slug>&environment=prod&secretPath=/' | jq -r .message   # "You are not a member of this project …"
-unset ID JWT TOKEN; kill %1
 ```
 
 Then run a web search from Hermes: the proxy log shows `"decision":"brokered"` for `tavily`.
@@ -297,7 +272,7 @@ Then run a web search from Hermes: the proxy log shows `"decision":"brokered"` f
 One-time, homekube#124 (Agent Vault's proxy token from Infisical). ArgoCD's prune of the SealedSecret deletes today's Secret; the running proxy keeps its old token until it restarts, but a restart before Infisical has the value leaves it down.
 
 1. Create a new token on proxy `homekube` and enter it in Infisical (step 2). Keep the old token.
-2. Merge. Once ArgoCD has synced, restart the operator (homekube#132 (deleted Secret not recreated)) and then the proxy (`kubectl -n agent-vault rollout restart deploy/agent-vault-proxy`): auto-reload fires on a change, so a recreated Secret may leave the running pod on the old token. Then run **Verify**.
+2. Merge. Once ArgoCD has synced, restart the operator (homekube#132 (deleted Secret not recreated)) and then the proxy (`kubectl -n agent-vault rollout restart deploy/agent-vault-proxy`): auto-reload fires on a change, so a recreated Secret may leave the running pod on the old token. Until the operator restart, the new pod from the merge sits in `CreateContainerConfigError` while the old one keeps serving. Then run **Verify**.
 3. Compare the fingerprint on the Proxies page with the comment above `caCert`. A new token re-enrolls the proxy, so expect a new CA: redo step 3's `caCert` in a follow-up PR. Hermes's proxied requests fail TLS from the proxy restart until that PR syncs, so do both back to back.
 4. Revoke the old token, and delete "Agent Vault proxy token (homekube)" from the password manager.
 
@@ -356,25 +331,13 @@ printf "ALTER USER coder PASSWORD '%s';\n" "$PGPW" | kubectl -n coder exec -i po
 unset PGPW
 ```
 
-**Verify** after any change: the Secrets are owned by their InfisicalSecrets, and Coder's identity reads its own project only. If a Secret is missing while its InfisicalSecret reports synced, restart the operator (homekube#132 (deleted Secret not recreated)): `kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager`.
+**Verify** after any change: the Secrets are owned by their InfisicalSecrets. The identity's isolation is checked once per Terraform apply, not here (`homekube-main` README, "Infisical configuration (human step)"). If a Secret is missing while its InfisicalSecret reports synced, restart the operator (homekube#132 (deleted Secret not recreated)): `kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager`.
 
 ```sh
 for s in coder/coder-secrets coder/postgres-credentials coder-workspaces/agent-vault-session; do
   kubectl -n ${s%/*} get infisicalsecret ${s#*/} -o jsonpath="${s}: {.status.conditions[*].status}{'\n'}"     # True True True
   kubectl -n ${s%/*} get secret ${s#*/} -o jsonpath="${s}: {.metadata.ownerReferences[*].kind}{'\n'}"         # InfisicalSecret only
 done
-
-# Another project's slug: copy it from that project's Settings (a made-up slug returns 404 whatever the permissions)
-kubectl -n infisical port-forward deploy/infisical 8080:8080 & sleep 3
-ID=$(kubectl -n coder get infisicalsecret coder-secrets -o jsonpath='{.spec.authentication.kubernetesAuth.identityId}')
-JWT=$(kubectl -n coder create token infisical-auth --duration=10m)
-TOKEN=$(curl -fsS http://localhost:8080/api/v1/auth/kubernetes-auth/login -H 'Content-Type: application/json' \
-  -d "{\"identityId\":\"$ID\",\"jwt\":\"$JWT\"}" | jq -r .accessToken)
-curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
-  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=coder&environment=prod&secretPath=/coder'          # 200
-curl -s -H "Authorization: Bearer $TOKEN" \
-  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=<another project slug>&environment=prod&secretPath=/' | jq -r .message   # "You are not a member of this project …"
-unset ID JWT TOKEN; kill %1
 ```
 
 Then sign in with Dex and run the template smoke test (step 3).
