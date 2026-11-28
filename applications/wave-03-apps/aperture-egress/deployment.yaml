@@ -5,6 +5,8 @@ metadata:
   namespace: aperture-egress
   labels:
     app.kubernetes.io/name: aperture-egress
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   # Two pods must never share one tailnet state Secret.

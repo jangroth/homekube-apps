@@ -460,23 +460,36 @@ curl -fsS -H "Authorization: Bearer $TOKEN" https://api.github.com/installation/
 
 Workspaces reach Aperture through one shared egress pod (ADR-0020), the only tailnet device on their behalf, tagged `tag:coder-workspaces`. The tag and its tests live in the tailnet policy file in the private `ai-gateway` repo.
 
-**1. Auth key.** Tailscale admin console → Settings → Keys → Generate auth key: description `homekube coder-workspaces egress`, **reusable**, **not ephemeral** (the device must survive pod restarts), pre-approved, tag `tag:coder-workspaces`, 90-day expiry. Store it in the password manager as "Tailscale auth key (coder-workspaces egress)".
+**1. Auth key.** Tailscale admin console → Settings → Keys → Generate auth key: description `homekube coder-workspaces egress`, **reusable**, **not ephemeral** (the device must survive pod restarts), pre-approved, tag `tag:coder-workspaces`, 90-day expiry. Keep the dialog open until step 2 has it in Infisical; it goes in no password manager.
 
-**2. Seal** (in a terminal; `read -s` needs a tty):
-
-```sh
-seal() { kubeseal --controller-name sealed-secrets --controller-namespace kube-system -o json; }
-
-read -s "TK?Tailscale auth key: "; echo
-kubectl create secret generic aperture-egress-tailscale -n aperture-egress \
-  --from-literal=TS_AUTHKEY="$TK" --dry-run=client -o json \
-| seal > applications/wave-03-apps/aperture-egress/tailscale-authkey-sealedsecret.yaml
-unset TK
-```
+**2. Enter it in Infisical.** The key comes from Infisical project `aperture-egress` (`applications/wave-03-apps/aperture-egress/infisicalsecret.yaml`), whose project and machine identity come from `homekube-main`'s `terraform/infisical/`. If Infisical was rebuilt empty rather than restored, set `identityId` to `aperture-egress` from its `terraform output identity_ids`. Infisical UI (`https://192.168.86.247`) → project `aperture-egress` → Production → path `/` → key `TS_AUTHKEY`, value the auth key. It syncs into `aperture-egress/aperture-egress-tailscale`, and the egress restarts within about a minute of a change (`syncConfig.resyncInterval` plus `secrets.infisical.com/auto-reload`). The Deployment is `Recreate`, so every restart briefly cuts workspaces off from Aperture.
 
 #### Rotation
 
-The key is only used for the first join: the pod keeps its tailnet identity in its state Secret, and tagged devices don't expire. An expired key therefore matters only when that state is lost (rebuild, deleted Secret). Then generate a new key as in step 1, reseal, merge, and restart the egress.
+The key is only used for the first join: the pod keeps its tailnet identity in its state Secret, and tagged devices don't expire. An expired key therefore matters only when that state is lost (rebuild, deleted Secret). Then generate a new key as in step 1 and enter it in Infisical (step 2); the egress restarts and joins with it. Revoke the old key in the admin console.
+
+#### Verify
+
+```sh
+kubectl -n aperture-egress get infisicalsecret        # aperture-egress-tailscale: READY True
+kubectl -n aperture-egress get secret aperture-egress-tailscale -o jsonpath='{.metadata.ownerReferences[*].kind}{"\n"}'   # InfisicalSecret only
+kubectl -n aperture-egress get pods                   # 2/2 Running
+```
+
+If the Secret is missing while its InfisicalSecret reports synced, restart the operator (homekube#132 (deleted Secret not recreated)): `kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager`. The identity's isolation is checked once per Terraform apply, not here (`homekube-main` README, "Infisical configuration (human step)"). Then check a running workspace still reaches Aperture (`ws1` is any workspace):
+
+```sh
+coder ssh ws1 -- curl -s -o /dev/null -w '%{http_code}\n' http://aperture-egress.aperture-egress.svc/v1/models  # 200
+```
+
+#### Cutover from sealed secrets
+
+One-time, homekube#125 (aperture-egress Tailscale auth key from Infisical). The new key isn't used until the egress next joins the tailnet: the pod keeps its identity in its state Secret, so the cutover doesn't exercise the key. Revoking the old key doesn't affect the joined device.
+
+1. Generate a new key (step 1) and enter it in Infisical (step 2).
+2. Merge, and straight after ArgoCD has synced, restart the operator (homekube#132 (deleted Secret not recreated)). The operator rolls the Deployment on its first reconcile, before the Secret exists; with `Recreate` the egress is down until the restart lets the new pod start, so do this when no workspace is mid-task.
+3. Run **Verify**.
+4. Revoke the old key in the admin console, and delete "Tailscale auth key (coder-workspaces egress)" from the password manager.
 
 ---
 
