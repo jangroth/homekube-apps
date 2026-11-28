@@ -108,18 +108,24 @@ kubectl -n homepage get secret homepage-widget-secrets -o jsonpath='{.metadata.o
 argocd account delete-token --account homepage <old token ID>
 ```
 
-**4. Check the identity is limited to its own project.** Log in as Homepage's machine identity with its service-account token, then read its own project and another one:
+If `homepage-widget-secrets` is missing while the InfisicalSecret reports synced, restart the operator: it skips unchanged secrets without checking the Secret still exists (homekube#132, deleted Secret not recreated).
 
 ```sh
-kubectl -n infisical port-forward deploy/infisical 8080:8080 &
+kubectl -n infisical-operator rollout restart deploy/infisical-controller-manager
+```
+
+**4. Check the identity is limited to its own project.** Log in as Homepage's machine identity with its service-account token, then read its own project and another one. Project slugs carry a random suffix (e.g. `test-project-jzs-o`): copy the other project's slug from its Settings, since a made-up slug returns 404 whatever the permissions.
+
+```sh
+kubectl -n infisical port-forward deploy/infisical 8080:8080 & sleep 3
 ID=$(kubectl -n homepage get infisicalsecret homepage-widget-secrets -o jsonpath='{.spec.authentication.kubernetesAuth.identityId}')
 JWT=$(kubectl -n homepage create token infisical-auth --duration=10m)
 TOKEN=$(curl -fsS http://localhost:8080/api/v1/auth/kubernetes-auth/login -H 'Content-Type: application/json' \
   -d "{\"identityId\":\"$ID\",\"jwt\":\"$JWT\"}" | jq -r .accessToken)
 curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
   'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=homepage&environment=prod&secretPath=/'           # 200
-curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
-  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=<another project slug>&environment=prod&secretPath=/'   # 403 or 404
+curl -s -H "Authorization: Bearer $TOKEN" \
+  'http://localhost:8080/api/v3/secrets/raw?workspaceSlug=<another project slug>&environment=prod&secretPath=/' | jq -r .message   # "You are not a member of this project …"
 unset ID JWT TOKEN; kill %1
 ```
 
@@ -173,28 +179,29 @@ kubectl delete pv infisical-restore-pg
 kubectl -n longhorn-system delete volumes.longhorn.io infisical-restore-pg
 ```
 
-**4. Alert drills.** Both alerts route to Telegram. `root-app` restores each child Application's sync policy, and the child app restores its resources, so pause both for the drill and resume them in reverse order:
+**4. Alert drills.** Both alerts route to Telegram. `root-app` restores each child Application's sync policy, and the child app restores its resources, so pause both for the drill and resume them in reverse order. Use `kubectl patch`: `argocd app set` refuses multi-source apps such as `infisical` without `--source-position`.
 
 ```sh
-argocd login 192.168.86.241 --username admin --insecure --grpc-web
+pause()  { kubectl -n argocd patch app "$1" --type json -p '[{"op":"remove","path":"/spec/syncPolicy/automated"}]'; }
+resume() { kubectl -n argocd patch app "$1" --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'; }
 
 # InfisicalDown: fires after 10m without a ready replica
-argocd app set root-app --sync-policy none
-argocd app set infisical --sync-policy none
+pause root-app; pause infisical
 kubectl -n infisical scale deploy/infisical --replicas=0
-# … wait for the Telegram alert, then:
-argocd app set infisical --sync-policy automated --self-heal --auto-prune   # restores replicas from git
-argocd app set root-app --sync-policy automated --self-heal --auto-prune
+# … wait for the Telegram alert, then resume by 13m after the scale-down:
+resume infisical   # restores replicas from git
+resume root-app
 
 # InfisicalSecretSyncErrors: fires after 15m of failed reconciles
-argocd app set root-app --sync-policy none
-argocd app set homepage --sync-policy none
+pause root-app; pause homepage
 kubectl -n homepage patch infisicalsecret homepage-widget-secrets --type merge \
   -p '{"spec":{"authentication":{"kubernetesAuth":{"serviceAccountRef":{"name":"no-such-sa"}}}}}'
 # … wait for the Telegram alert, then:
-argocd app set homepage --sync-policy automated --self-heal --auto-prune   # restores the InfisicalSecret from git
-argocd app set root-app --sync-policy automated --self-heal --auto-prune
+resume homepage    # restores the InfisicalSecret from git
+resume root-app
 ```
+
+An Infisical outage also fails every InfisicalSecret's resync, so an outage of 15m, including the couple of minutes Infisical takes to become ready, fires the sync-error alert as well. That alert stays firing for about 20m after the last failed reconcile (its `[20m]` window), so let it clear before starting the second drill.
 
 ---
 
