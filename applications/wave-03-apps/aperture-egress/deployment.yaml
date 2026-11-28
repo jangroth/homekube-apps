@@ -5,6 +5,8 @@ metadata:
   namespace: aperture-egress
   labels:
     app.kubernetes.io/name: aperture-egress
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   replicas: 1
   # Two pods must never share one tailnet state Secret.
@@ -74,11 +76,13 @@ spec:
           image: tailscale/tailscale:v1.104.7
           imagePullPolicy: IfNotPresent
           env:
+            # Only a first join reads it; with saved state the pod starts without it.
             - name: TS_AUTHKEY
               valueFrom:
                 secretKeyRef:
                   name: aperture-egress-tailscale
                   key: TS_AUTHKEY
+                  optional: true
             - name: TS_KUBE_SECRET
               value: aperture-egress-tailscale-state
             - name: TS_HOSTNAME
