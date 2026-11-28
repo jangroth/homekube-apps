@@ -20,6 +20,8 @@ metadata:
   namespace: coder
   labels:
     app.kubernetes.io/name: postgres
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
 spec:
   serviceName: postgres
   replicas: 1

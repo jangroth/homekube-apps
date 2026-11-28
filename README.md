@@ -279,31 +279,59 @@ On a rebuild, re-seal both from the password manager. A new proxy token re-enrol
 
 Coder ([spec 011](https://github.com/jangroth/homekube/blob/main/docs/archive/specs/011-coder-install.md)) needs bootstrap secrets, two owner accounts, its template pushed by hand, and a backup before every version bump.
 
-**1. Bootstrap secrets.** Generate, store in the password manager **before** sealing, then seal. The Dex client secret goes into two Secrets: Coder's and Dex's. On a rebuild, re-seal from the password-manager values.
+**1. Secrets.** Coder's three Secrets come from Infisical project `coder` (`applications/wave-03-apps/coder-extras/infisicalsecrets.yaml`), whose project and machine identity come from `homekube-main`'s `terraform/infisical/`. If Infisical was rebuilt empty rather than restored, set `identityId` in `infisicalsecrets.yaml` to `coder` from its `terraform output identity_ids`. The Dex client secret is in both Coder's and Dex's Secrets; Dex's copy is still sealed.
+
+Generate and store in the password manager **before** entering anything:
 
 ```sh
-PGPW=$(openssl rand -hex 24); OIDC=$(openssl rand -hex 32)
+PGPW=$(openssl rand -hex 24); OIDC=$(openssl rand -hex 32)   # on a rotation, keep OIDC: see below
 
 echo "Coder (spec 011)
 POSTGRES_USER=coder
 POSTGRES_PASSWORD=$PGPW
 POSTGRES_DB=coder
+CODER_PG_CONNECTION_URL=postgres://coder:$PGPW@postgres.coder.svc.cluster.local:5432/coder?sslmode=disable
 DEX_CLIENT_ID=coder
 DEX_CLIENT_SECRET=$OIDC
-Sealed into: coder/coder-secrets, coder/postgres-credentials, dex/dex-coder-client"
+In: Infisical coder (/coder, /postgres), dex/dex-coder-client (sealed)"
 # → paste into the password manager and save before going on; clear the terminal afterwards
+```
 
+Infisical UI (`https://192.168.86.247`) → project `coder` → Production. Create folders `coder`, `postgres` and `agent-vault-session`, and add:
+
+| Path | Keys | Synced into |
+|------|------|-------------|
+| `/coder` | `CODER_PG_CONNECTION_URL`, `CODER_OIDC_CLIENT_SECRET` (= `DEX_CLIENT_SECRET`) | `coder/coder-secrets` |
+| `/postgres` | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | `coder/postgres-credentials` |
+| `/agent-vault-session` | `HTTPS_PROXY` ([Agent Vault for workspaces](#agent-vault-for-workspaces-human-step)) | `coder-workspaces/agent-vault-session` |
+
+Coder and Postgres restart within about a minute of a change (`syncConfig.resyncInterval` plus `secrets.infisical.com/auto-reload`).
+
+Postgres reads `POSTGRES_PASSWORD` only when it initialises an empty volume. To **rotate the password** on a running cluster, generate a new `PGPW` only (Dex's copy of the OIDC secret is sealed, so keep `OIDC` and rotate both sides together), store it, change it in the database, then update `POSTGRES_PASSWORD` and `CODER_PG_CONNECTION_URL` in Infisical straight away. Coder's open connections survive until it restarts with the new URL.
+
+```sh
+read -s "PGPW?New Postgres password: "; echo
+printf "ALTER USER coder PASSWORD '%s';\n" "$PGPW" | kubectl -n coder exec -i postgres-0 -- psql -U coder -d coder
+unset PGPW
+```
+
+Verify, then check the identity is limited to its own project, as for [Homepage](#homepage-widget-credentials-human-step) step 4 (namespace `coder`, project slug `coder`, paths `/coder`, `/postgres`, `/agent-vault-session`). If a Secret is missing while its InfisicalSecret reports synced, restart the operator (homekube#132, deleted Secret not recreated).
+
+```sh
+kubectl -n coder get infisicalsecret                          # coder-secrets, postgres-credentials: READY True
+kubectl -n coder-workspaces get infisicalsecret               # agent-vault-session: READY True
+for s in coder/coder-secrets coder/postgres-credentials coder-workspaces/agent-vault-session; do
+  kubectl -n ${s%/*} get secret ${s#*/} -o jsonpath="${s}: {.metadata.ownerReferences[0].kind}{'\n'}"   # InfisicalSecret
+done
+```
+
+Then sign in with Dex and run the template smoke test (step 3).
+
+Dex's copy, until it moves to Infisical:
+
+```sh
 seal() { kubeseal --controller-name sealed-secrets --controller-namespace kube-system -o json; }
 cd applications/wave-03-apps/coder-extras
-
-kubectl create secret generic coder-secrets -n coder --dry-run=client -o json \
-  --from-literal=CODER_PG_CONNECTION_URL="postgres://coder:$PGPW@postgres.coder.svc.cluster.local:5432/coder?sslmode=disable" \
-  --from-literal=CODER_OIDC_CLIENT_SECRET="$OIDC" \
-| seal > coder-sealedsecret.yaml
-
-kubectl create secret generic postgres-credentials -n coder --dry-run=client -o json \
-  --from-literal=POSTGRES_USER=coder --from-literal=POSTGRES_PASSWORD="$PGPW" --from-literal=POSTGRES_DB=coder \
-| seal > postgres-sealedsecret.yaml
 
 kubectl create secret generic dex-coder-client -n dex --dry-run=client -o json \
   --from-literal=CODER_CLIENT_SECRET="$OIDC" \
@@ -502,24 +530,21 @@ Workspaces reach GitHub through the Agent Vault proxy (ADR-0012), which attaches
   - `github-api`: host `api.github.com`, methods `GET`, `POST`, `PATCH`, `PUT`, `DELETE`, no paths. Bearer credential: header `Authorization`, prefix `Bearer`, value `{{GH_TOKEN_AGENT_SANDBOX}}`.
 - **Session** on bundle `coder-workspaces`, label `coder-workspaces`, expiry **Never**. Store the **session token** as "Agent Vault session token (coder-workspaces bundle)".
 
-**2. Seal the session** (in a terminal; `read -s` needs a tty):
+**2. Enter the session in Infisical** (in a terminal; `read -s` needs a tty). It syncs into `coder-workspaces/agent-vault-session` ([Coder](#coder-human-step) step 1).
 
 ```sh
-seal() { kubeseal --controller-name sealed-secrets --controller-namespace kube-system -o json; }
-
 # The session token is the password half of the workspace's HTTPS_PROXY URL.
 read -s "ST?Session token: "; echo
-kubectl create secret generic agent-vault-session -n coder-workspaces \
-  --from-literal=HTTPS_PROXY="http://x-agent-vault:${ST}@agent-vault-proxy.agent-vault.svc:17323" \
-  --dry-run=client -o json \
-| seal > applications/wave-03-apps/coder-extras/agent-vault-session-sealedsecret.yaml
+printf '%s' "http://x-agent-vault:${ST}@agent-vault-proxy.agent-vault.svc:17323" | pbcopy
 unset ST
 ```
+
+Infisical UI → project `coder` → Production → path `/agent-vault-session` → key `HTTPS_PROXY`, value pasted from the clipboard. Clear the clipboard afterwards.
 
 #### Rotation
 
 - **GitHub token**: set `GH_TOKEN_AGENT_SANDBOX` to a token minted as in [GitHub App `homekube-agent`](#github-app-homekube-agent-and-agent-sandbox-human-step) step 5. The proxy picks it up within one poll interval (60s); workspaces are untouched.
-- **Session**, make-before-break: create a new session on bundle `coder-workspaces`, store its token, reseal (step 2), merge, and recreate running workspaces. Once a new workspace's git operation shows `brokered`, revoke the old session. Revoking cuts every workspace off from GitHub, which is also the kill switch.
+- **Session**, make-before-break: create a new session on bundle `coder-workspaces`, store its token, update `HTTPS_PROXY` (step 2), and recreate running workspaces. Once a new workspace's git operation shows `brokered`, revoke the old session. Revoking cuts every workspace off from GitHub, which is also the kill switch.
 
 ---
 

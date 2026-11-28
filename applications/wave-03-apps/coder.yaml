@@ -58,6 +58,9 @@ spec:
               - server
               - --external-auth-github-default-provider-enable=false
 
+            annotations:
+              secrets.infisical.com/auto-reload: "true"
+
             envFrom:
               - secretRef:
                   name: coder-secrets
